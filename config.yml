@@ -1,0 +1,17 @@
+# default config.yml
+# this is the format radio chat uses
+radio-format: '§2[§6%FREQ.%CODE§7%SUFFIX§2]§e%SENDER§f: %MESSAGE'
+# this can be what ever you want
+radio-suffix: rHz
+chat-distance: 64.0
+radio-distance: 160.0
+chat-limited: true
+radio-limited: false
+enable-skywave: false
+skywave-mod: 2.0
+radio-min: 32
+radio-max: 512
+radio-cutoff-max: 15
+radio-code-max: 999
+radio-default-channel: 64
+radio-auto-on: true

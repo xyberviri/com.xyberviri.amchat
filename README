@@ -1,0 +1,44 @@
+AM Chat offers an exciting low tech take on “chat frequencies”, instead of "General" players can use frequencies to transmit there conversations.
+Just like a radio that frequency can be change, you can also encode that chat so only players with that same code on the same frequency can read your text.
+Local Chat can also be restricted, by default this is set to 64 blocks. A filter can be set so only legible text can be received.
+You can optionally limit the distance of radio chat as well.
+
+Version:0.0.1r1
+
+Features:
+..turn personal radio on/off
+..tune to a frequency between 32-512 rHz
+..use a code between 1-999, to encrypt your chat, 0 to disables
+..turn mic on/off
+..filter chat that is encrypted and otherwise unreadable.
+..set a frequency cutoff so you receive chat from <your_frequency>+-<cutoff>
+..set a frequency default freq. to set when joining server 32 by default
+..set if a player’s radio is default set to on upon joining server
+
+Commands:
+Command: /am
+Description: display information about your radio
+
+Command: /am radio
+Description: toggle radio on/off
+
+Command: /am mic
+Description: toggle mic on/off, your radio needs to be on to receive transmissions
+
+Command: /am cutoff #
+Description: # 0-15, lets you hear chat on neighboring frequencies.
+Example: If your on frequency 15 and your cutoff is 5 you will hear chat on frequency 10-20
+
+Command: /am tune #
+Description: # 32-512, lets you turn your radio to one of the frequencies between 32-512
+
+Command: /am code #
+Description: # 0-999, lets you encrypt chat, only players on the same frequency with the same code can read your text clearly.
+
+Command: /am filter
+Description: toggle your filter on/off, if you can't read the text clearly turn this on if you don’t want to get it at all
+
+Consol Command: am list
+Description: view all the players online, with active radio’s and what settings they have.(good when people are complaining why something isn’t working)
+
+

@@ -1,0 +1,34 @@
+name: AMChat
+author: Xyberviri
+main: com.xyberviri.amchat.AMChat
+version: 0.0.1r1
+commands:
+   am:
+      description: display information about your radio
+      permission: amchat.radio.personal.use
+      usage: /am
+   am radio:
+      description: toggles your radio on off 
+      permission: amchat.radio.personal.radio
+      usage: /am radio
+   am mic:
+      description: toggles your mic on off
+      permission: amchat.radio.personal.mic
+      usage: /am mic
+   am filter:
+      description: toggles your filter on off
+      permission: amchat.radio.personal.filter
+      usage: /am filter      
+   am tune:
+      description: Tunes personal radio to a specific channel
+      permission: amchat.radio.personal.tune
+      usage: /am tune <#>
+   am code:
+      description: Sets the encryption code before transmission 0 to disable
+      permission: amchat.radio.personal.code
+      usage: /am code <#>
+   am cutoff:
+      description: adjust your cutoff
+      permission: amchat.radio.personal.cutoff
+      usage: /am cutoff <#>
+      
