@@ -138,6 +138,10 @@ public class AMChatCmd implements CommandExecutor {
 			return true;
 		}			
 		
+		if(cmd.getName().equalsIgnoreCase("am") && args[0].equalsIgnoreCase("ping") && args.length == 2){
+			
+			
+		}
 		
 		return false;
 	}
