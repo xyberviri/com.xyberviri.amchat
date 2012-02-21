@@ -77,7 +77,7 @@ public class AMChatCmd implements CommandExecutor {
 			try{ 
 				Integer targetValue = Integer.parseInt(args[1]);
 				
-				if(targetValue<amcMain.varRadioMinFreq || targetValue>amcMain.varRadioMaxFreq){
+				if((targetValue<amcMain.varRadioMinFreq || targetValue>amcMain.varRadioMaxFreq)&&(!player.isOp())){
 					amcMain.amcTools.errorToPlayer(player,"Valid Frequencies are "+amcMain.varRadioMinFreq+"-"+amcMain.varRadioMaxFreq);
 					return true;
 				}				
@@ -93,7 +93,7 @@ public class AMChatCmd implements CommandExecutor {
 		if(cmd.getName().equalsIgnoreCase("am") && args[0].equalsIgnoreCase("code") && args.length == 2){
 			try{ 
 				Integer targetValue = Integer.parseInt(args[1]);
-				if(targetValue>amcMain.varRadioMaxCode){
+				if(targetValue>amcMain.varRadioMaxCode&&(!player.isOp())){
 					amcMain.amcTools.errorToPlayer(player,"Valid Code is 0-"+amcMain.varRadioMaxCode);
 					return true;
 				}
@@ -109,7 +109,7 @@ public class AMChatCmd implements CommandExecutor {
 		if(cmd.getName().equalsIgnoreCase("am") && args[0].equalsIgnoreCase("cutoff") && args.length == 2){
 			try{ 
 				Integer targetValue = Integer.parseInt(args[1]);
-				if(targetValue>amcMain.varRadioMaxCuttoff){
+				if(targetValue>amcMain.varRadioMaxCuttoff&&(!player.isOp())){
 					amcMain.amcTools.errorToPlayer(player,"Valid Cutoff is 0-"+amcMain.varRadioMaxCuttoff);
 					return true;
 				}
