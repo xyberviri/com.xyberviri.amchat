@@ -1,34 +1,38 @@
 name: AMChat
 author: Xyberviri
 main: com.xyberviri.amchat.AMChat
-version: 0.1
+version: 0.2
 commands:
    am:
       description: display information about your radio
       permission: amchat.radio.personal.use
-      usage: /am
+      usage: Usage: /am
    am radio:
       description: toggles your radio on off 
       permission: amchat.radio.personal.radio
-      usage: /am radio
+      usage: Usage: /am radio
    am mic:
       description: toggles your mic on off
       permission: amchat.radio.personal.mic
-      usage: /am mic
+      usage: Usage: /am mic
    am filter:
       description: toggles your filter on off
       permission: amchat.radio.personal.filter
-      usage: /am filter      
+      usage: Usage: /am filter      
    am tune:
       description: Tunes personal radio to a specific channel
       permission: amchat.radio.personal.tune
-      usage: /am tune <#>
+      usage: Usage: /am tune <#>
    am code:
       description: Sets the encryption code before transmission 0 to disable
       permission: amchat.radio.personal.code
-      usage: /am code <#>
+      usage: Usage: /am code <#>
    am cutoff:
       description: adjust your cutoff
       permission: amchat.radio.personal.cutoff
-      usage: /am cutoff <#>
+      usage: Usage: /am cutoff <#>
+   am home:
+      description: Reset your radio to the default
+      permission: amchat.radio.personal.home
+      usage: Usage: /am home
       

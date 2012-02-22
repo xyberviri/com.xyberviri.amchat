@@ -51,7 +51,7 @@ public class AMChat extends JavaPlugin {
 	Map<Player, Boolean> playerRadioMic = new HashMap<Player, Boolean>();		// Player radio broadcasting enabled	
 	Map<Player, Boolean> playerRadioFilter = new HashMap<Player, Boolean>();	// Player radio filter blocks encrypted chat that is otherwise unreadable
 	Map<Player, Integer> playerRadioCutoff = new HashMap<Player, Integer>();	// Player radio cutoff blocks other channels, i.e. cross talk, we might make this a integer later
-	Map<Player, String>  playerRadioPing = new HashMap<Player,String>();		// This is the last player that sent a  ping
+	Map<Player, String>  playerRadioLinkID = new HashMap<Player,String>();		// If a player is linked to a tower this will be set to something. 		
 	
 	public void loadSettings(){
 		this.varMsgFormat = amcConfig.getString("radio-format", varMsgFormat);
