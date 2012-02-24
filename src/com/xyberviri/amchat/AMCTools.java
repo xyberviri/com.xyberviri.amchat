@@ -8,11 +8,9 @@ import org.bukkit.entity.Player;
 
 public class AMCTools {
 	AMChat amcMain;
-	private boolean amcToolsLoaded = false;
 	
 	public AMCTools(AMChat amChat){
 		this.amcMain = amChat;
-		this.amcToolsLoaded = true;
 	}
 	
 	public double getDistance(Location location1,Location location2){
@@ -111,5 +109,11 @@ public class AMCTools {
 	    return builder.toString();
 	}	
 	
-	public boolean isLoaded(){return amcToolsLoaded;}
+	//returns true if we are loaded from the main plugin. 
+	public boolean isLoaded(AMChat amcMainPlugin) {
+		if (this.amcMain.equals(amcMainPlugin)){
+			return true;
+			}
+		return false;
+	}
 }

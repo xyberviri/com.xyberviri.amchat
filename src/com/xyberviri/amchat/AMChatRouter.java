@@ -66,5 +66,10 @@ public class AMChatRouter {
 	}
 
 	// return true if we were successfully loaded
-	public boolean isLoaded() {return amcRouterLoaded;}	
+	public boolean isLoaded(AMChat amcMainPlugin) {
+		if (this.amcMain.equals(amcMainPlugin)){
+			return true;
+			}
+		return false;
+	}
 }

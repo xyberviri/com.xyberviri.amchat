@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -18,8 +19,10 @@ public class AMChat extends JavaPlugin {
 	AMChatRouter amcRouter;					//Chat router is responsible for deciding what to do with player chat events.
 	AMChatListener amcListener;				//Chat Listener
 	AMChatCmd amcCmd;						//AMC Command control
-	PluginDescriptionFile amcPdf;
-	FileConfiguration amcConfig;
+	AMChatRadioManager amcRadMan;			//
+	PluginDescriptionFile amcPdf;			//Plugin Description File
+	FileConfiguration amcConfig;			//config.yml file
+	
 	
 	final Logger amcLogger = Logger.getLogger("Minecraft");
 	
@@ -103,26 +106,29 @@ public class AMChat extends JavaPlugin {
 		this.amcRouter = new AMChatRouter(this);
 		this.amcCmd = new AMChatCmd(this);
 		this.amcListener = new AMChatListener(this);
+		this.amcRadMan = new AMChatRadioManager(this);
+		
 				
 		// Plugin Health Checks
 		// Tool package
-		if(amcTools.isLoaded()){logMessage("Tools Package Linked");}
+		if(amcTools.isLoaded(this)){logMessage("Tools Package Linked");}
 		else{logError("Could not link to Tools Package!");}
 		
 		// Chat router initialized
-		if (amcRouter.isLoaded()){logMessage("Chat Router Linked");} 
+		if (amcRouter.isLoaded(this)){logMessage("Chat Router Linked");} 
 		else {logError("Could not link to Chat Router!");}
 		
 		// "AMChat" Listener, not "chat listener", loaded and event registered with plugin manager. 
-		if(amcListener.isLoaded()){
+		if(amcListener.isLoaded(this)){
 			logMessage("Chat listener loaded");
 			this.getServer().getPluginManager().registerEvents(amcListener, this);
 		}
 		else {logError("Could not load AMChat listener");}
 		
-		if(amcCmd.isLoaded()){
+		if(amcCmd.isLoaded(this)){
 			logMessage("Command control loaded");
 			this.getCommand("am").setExecutor(amcCmd);
+			this.getCommand("xm").setExecutor(amcCmd);
 		}
 		else {logError("Could not load command control module");}
 		
@@ -306,10 +312,8 @@ public class AMChat extends JavaPlugin {
 		}
 	}
 
-	// Return boolean for player cutoff filter state
-	// if the filter is enabled will return true
-	// if the filter is disabled will return false
-	// if the value is null, will set the value to false and return that
+	// return the cutoff value for our radio
+	// we hear our_channel+-cut_off
 	public int getPlayerCutoff(Player player){
 		if(playerRadioCutoff.containsKey(player)){
 			return playerRadioCutoff.get(player);			
@@ -320,38 +324,29 @@ public class AMChat extends JavaPlugin {
 	}
 
 	public boolean canReceive(Player sender, Player player) {
-//		logMessage(sender.getDisplayName()+" > "+player.getDisplayName());
-//		logMessage(playerRadioChannel.get(sender)+" > "+playerRadioChannel.get(player));
-//		logMessage(playerRadioCode.get(sender)+" > "+playerRadioCode.get(player));
-//		logMessage(playerRadioCutoff.get(sender)+" > "+playerRadioCutoff.get(player));
-//		logMessage("receiving filter > "+playerRadioFilter.get(player));
-		
 		if (sender.equals(player)){
-//			logMessage("TRUE:Sender is Reciever");
+			//seriously, nah just kidding yeah the player can hear them self. 
 			return true;}
 		if(!isRadioOn(player)){
-//			logMessage("FALSE:Radio Off");
+			//The player doesn't even have his radio on
 			return false;} 
-		if (playerRadioChannel.get(sender) < (playerRadioChannel.get(player) - playerRadioCutoff.get(player)) ){ 
-//			logMessage("FALSE:"+playerRadioChannel.get(sender)+" < "+playerRadioChannel.get(player)+" - "+playerRadioCutoff.get(player));
+		if (playerRadioChannel.get(sender) < (playerRadioChannel.get(player) - playerRadioCutoff.get(player)) ){
+			//Radio chat is below cutoff limit
 			return false;
 		} else if (playerRadioChannel.get(sender) > (playerRadioChannel.get(player) + playerRadioCutoff.get(player))  ) {
-//			logMessage("FALSE"+playerRadioChannel.get(sender)+" > "+playerRadioChannel.get(player)+" + "+playerRadioCutoff.get(player));
+			//Radio channel is above the cutoff limit
 			return false;
 		}
 		if((playerRadioChannel.get(sender)!=playerRadioChannel.get(player))&&(playerRadioCode.get(sender)!=playerRadioCode.get(player))&&(playerRadioFilter.get(player))){
-//			logMessage("FALSE:Filter Enabled");
+			//message is encrypted and we don't want to hear that shit.
 			return false;
 			}
 		if(varLimitRadioChat){
-//			logMessage("INFO:Radio Chat Distance being checked");
 			if(amcTools.getDistance(sender.getLocation(), player.getLocation()) > varRadioMaxChatDist){
-//				logMessage("FALSE:Radio Distance too Far");
+				//Radio chat is limited and they are too far
 				return false;
 				}
 			}
-		
-//		logMessage("TRUE:Player can receive message");
 		return true;
 	}	
 	
@@ -362,25 +357,11 @@ public class AMChat extends JavaPlugin {
 		return false;
 	}
 
-
+	public void playerRadioPing(Player sender, Player player) {
+		String pingMessage = "*PING*"+amcTools.createMessage(player, ChatColor.YELLOW+"*PING*");
+		amcTools.msgToPlayer(player, pingMessage);
+		amcTools.msgToPlayer(sender, pingMessage);
+		
+	}
 	
-	
-//	public void togglePlayerMic(Player player){
-//		if(playerRadioMic.containsKey(player)){
-//		if(playerRadioMic.get(player)){
-//			playerRadioMic.put(player, false);
-//			player.sendMessage(ChatColor.YELLOW + "Mic Off");
-//		} else {
-//			playerRadioMic.put(player, true);
-//			player.sendMessage(ChatColor.YELLOW + "Mic On");			
-//		}
-//		} else {
-//			playerRadioMic.put(player, true);
-//			player.sendMessage(ChatColor.YELLOW + "Mic On");
-//		}			
-//		
-//	}	
-	
-	
-
 }

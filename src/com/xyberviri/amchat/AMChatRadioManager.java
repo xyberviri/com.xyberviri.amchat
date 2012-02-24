@@ -4,13 +4,11 @@ package com.xyberviri.amchat;
 
 public class AMChatRadioManager {
 	AMChat amcMain;
-	private boolean isLoaded = false;
 	
 	
 	
 	AMChatRadioManager(AMChat amchat){
 		this.amcMain = amchat;
-		this.isLoaded = true;
 	}
 	
 	
@@ -18,7 +16,10 @@ public class AMChatRadioManager {
 	
 	
 	
-	public boolean isLoaded(){
-		return this.isLoaded;
+	public boolean isLoaded(AMChat amcMainPlugin) {
+		if (this.amcMain.equals(amcMainPlugin)){
+			return true;
+			}
+		return false;
 	}
 }

@@ -1,6 +1,7 @@
 package com.xyberviri.amchat;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -44,17 +45,17 @@ public class AMChatCmd implements CommandExecutor {
 		}	
 		
 		Player player = (Player) sender;
-		//am tune
-		//am code #
-		//am filter
-		//am cutoff #
-		//am home
+
+		//AM command branch
+		if (cmd.getName().equalsIgnoreCase("am")){
+			
+
 		if (cmd.getName().equalsIgnoreCase("am") && args.length == 0){
-			amcMain.amcTools.msgToPlayer(player,"[ Xmit Freq ]:"," "+amcMain.getPlayerRadioChannel(player));
-			amcMain.amcTools.msgToPlayer(player,"[ Cutoff Rng]:"," "+amcMain.getPlayerCutoff(player));
-			amcMain.amcTools.msgToPlayer(player,"[ Encrpt Key]:"," "+amcMain.getPlayerRadioCode(player));
-			amcMain.amcTools.msgToPlayer(player,"[ Filter On ]:"," "+amcMain.getPlayerFilter(player));
-			amcMain.amcTools.msgToPlayer(player,"[ Mic Open  ]:"," "+amcMain.getPlayerMic(player));
+			amcMain.amcTools.msgToPlayer(player,"[-Xmit-Freq-]:"," "+amcMain.getPlayerRadioChannel(player));
+			amcMain.amcTools.msgToPlayer(player,"[-Xmit-Code-]:"," "+amcMain.getPlayerRadioCode(player));
+			amcMain.amcTools.msgToPlayer(player,"[--Mic-Open-]:"," "+amcMain.getPlayerMic(player));
+			amcMain.amcTools.msgToPlayer(player,"[--Cut-Off--]:"," "+amcMain.getPlayerCutoff(player));
+			amcMain.amcTools.msgToPlayer(player,"[--Filter---]:"," "+amcMain.getPlayerFilter(player));			
 			return true;
 		}
 		
@@ -139,9 +140,28 @@ public class AMChatCmd implements CommandExecutor {
 		}			
 		
 		if(cmd.getName().equalsIgnoreCase("am") && args[0].equalsIgnoreCase("ping") && args.length == 2){
-			
-			
+			Player other = Bukkit.getServer().getPlayer(args[1]);
+	        if (other == null) {
+	        	amcMain.amcTools.errorToPlayer(player, args[1] + " is not online!");
+	        	return false;
+	        }
+			amcMain.playerRadioPing(player,other);
+			return true;
 		}
+		
+		return false;
+		}
+		//Else if  were using XM commands 
+		else if (cmd.getName().equalsIgnoreCase("xm")){
+			
+			
+			
+			return false;
+		}
+		
+		
+		
+		
 		
 		return false;
 	}
@@ -151,7 +171,12 @@ public class AMChatCmd implements CommandExecutor {
 	
 	
 	
-	public boolean isLoaded(){
-		return this.amChatCmLoaded;
+	// return true if we were successfully loaded
+	public boolean isLoaded(AMChat amcMainPlugin) {
+		if (this.amcMain.equals(amcMainPlugin)){
+			return true;
+			}
+		return false;
 	}
+	
 }
