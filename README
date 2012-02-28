@@ -36,7 +36,35 @@ Description: # 0-999, lets you encrypt chat, only players on the same frequency 
 Command: /am filter
 Description: toggle your filter on/off, if you can't read the text clearly turn this on if you don’t want to get it at all
 
-Consol Command: am list
+Command: /am home
+Description: Sets all your settings to the default you get when first joining the server
+
+Command: /am ping
+
+Console Command: am list
 Description: view all the players online, with active radio’s and what settings they have.(good when people are complaining why something isn’t working)
+
+TODO LOG:
+Add Range Check on ping command
+Add Setting for handeling nether/ender/multi verse.
+Add Features for Nether such as 8x multiplyer. 
+
+CHANGE LOG
+Version 0.2
+Added amchat.local.hearall permission so player can always receive any message sent reguardless of range over local chat
+Added OPs are able to hear all local chat.
+Added amchat.radio.hearall permission so player can always receive any message sent reguardless of range radio chat
+Added OPs are able to receive all chat reguardless of range
+Added amchat.radio.readall permission so player can be able to read all chat.
+Added OPs are able to read all chat. 
+Added following permissions to /am tune, cutoff and code commands
+amchat.radio.override.tune     - this lets you tune to any frequency, always true for ops
+amchat.radio.override.code     - this lets you use any code including negative ones, always true for ops
+amchat.radio.override.cutoff   - this permission lets you set any cutoff(negatives will default to 0), always true for ops.
+Added Ping usage is /am ping playername permission is amchat.radio.personal.ping
+Change Chat router to use methods instead of direct var access, there are still some calls directly but there are significantly less now. 
+Added Radio Link ID varible in AMChat main, Added Setter(will set to "none" on empty string)/added Getter method for varible.
+Removed world check for amTools.getDistance
+Added public method AMChatRadioManager.genSerial, this generates a serial number for radios
 
 

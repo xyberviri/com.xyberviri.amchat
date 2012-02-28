@@ -1,14 +1,17 @@
 package com.xyberviri.amchat;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -23,7 +26,9 @@ public class AMChat extends JavaPlugin {
 	PluginDescriptionFile amcPdf;			//Plugin Description File
 	FileConfiguration amcConfig;			//config.yml file
 	
-	
+	private FileConfiguration playerRadioConfig=null;
+	private File playerRadioConfigFile = null;
+
 	final Logger amcLogger = Logger.getLogger("Minecraft");
 	
 	// Settings
@@ -56,6 +61,40 @@ public class AMChat extends JavaPlugin {
 	Map<Player, Integer> playerRadioCutoff = new HashMap<Player, Integer>();	// Player radio cutoff blocks other channels, i.e. cross talk, we might make this a integer later
 	Map<Player, String>  playerRadioLinkID = new HashMap<Player,String>();		// If a player is linked to a tower this will be set to something. 		
 	
+	//Player Settings File Reload/Get/Save//
+	public void reloadConfigPlayerRadioSettings(){
+		if(playerRadioConfigFile==null){
+			playerRadioConfigFile=new File(this.getDataFolder(),"pl.settings.yml");
+		}
+		
+		playerRadioConfig = YamlConfiguration.loadConfiguration(playerRadioConfigFile);
+		InputStream defConfigStream = getResource("pl.settings.yml");
+		
+		if (defConfigStream != null) {
+			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+			playerRadioConfig.setDefaults(defConfig);
+	}}
+	
+	public FileConfiguration getConfigPlayerRadioSettings(){
+		if (playerRadioConfig==null){
+			reloadConfigPlayerRadioSettings();
+			}
+		return playerRadioConfig;			
+	}
+	
+	public void saveConfigPlayerRadioSettings(){
+		if (playerRadioConfigFile==null||playerRadioConfig==null){
+			logMessage("unable to save varible for Config or file is null");
+			return;}
+		try{
+			playerRadioConfig.save(playerRadioConfigFile);
+			logMessage("Saving player settings file");
+		} catch (IOException ex){
+			logMessage("Could not save player setting file "+playerRadioConfigFile+" IOexception " + ex.toString());
+		}
+		
+	}
+	
 	public void loadSettings(){
 		this.varMsgFormat = amcConfig.getString("radio-format", varMsgFormat);
 		this.varRadioFreqSuffix = amcConfig.getString("radio-suffix",varRadioFreqSuffix);
@@ -71,6 +110,7 @@ public class AMChat extends JavaPlugin {
 		this.varRadioMaxCode = amcConfig.getInt("radio-code-max", varRadioMaxCode);
 		this.varRadioDefFreq = amcConfig.getInt("radio-default-channel", varRadioDefFreq);
 		this.varRadioAutoOn = amcConfig.getBoolean("radio-auto-on", varRadioAutoOn);
+		
 	}
 	
 	public void saveSettings(){
@@ -94,6 +134,7 @@ public class AMChat extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		saveSettings();
+		saveConfigPlayerRadioSettings();
 		amcLogger.info(" disabled.");
 	}
 
@@ -102,39 +143,21 @@ public class AMChat extends JavaPlugin {
 		// Load services, order is important!//
 		this.amcPdf = this.getDescription();
 		this.amcConfig = this.getConfig();
+		this.playerRadioConfig = this.getConfigPlayerRadioSettings();
 		this.amcTools = new AMCTools(this);
 		this.amcRouter = new AMChatRouter(this);
 		this.amcCmd = new AMChatCmd(this);
 		this.amcListener = new AMChatListener(this);
 		this.amcRadMan = new AMChatRadioManager(this);
+
+		this.getServer().getPluginManager().registerEvents(amcListener, this);
 		
-				
-		// Plugin Health Checks
-		// Tool package
-		if(amcTools.isLoaded(this)){logMessage("Tools Package Linked");}
-		else{logError("Could not link to Tools Package!");}
-		
-		// Chat router initialized
-		if (amcRouter.isLoaded(this)){logMessage("Chat Router Linked");} 
-		else {logError("Could not link to Chat Router!");}
-		
-		// "AMChat" Listener, not "chat listener", loaded and event registered with plugin manager. 
-		if(amcListener.isLoaded(this)){
-			logMessage("Chat listener loaded");
-			this.getServer().getPluginManager().registerEvents(amcListener, this);
-		}
-		else {logError("Could not load AMChat listener");}
-		
-		if(amcCmd.isLoaded(this)){
-			logMessage("Command control loaded");
-			this.getCommand("am").setExecutor(amcCmd);
-			this.getCommand("xm").setExecutor(amcCmd);
-		}
-		else {logError("Could not load command control module");}
+		this.getCommand("am").setExecutor(amcCmd);
+		this.getCommand("xm").setExecutor(amcCmd);
 		
 		loadSettings();	
 		saveSettings();
-		logMessage("enabled");
+		logMessage("Enabled");
 	}
 	
 
@@ -144,25 +167,101 @@ public class AMChat extends JavaPlugin {
 	// Log error message to console, disable plugin. These really never should occur, if they do we need to shut down the plugin and let the sever manager know.  
 	public void logError(String message){
 		amcLogger.severe("["+amcPdf.getName()+"] WARNING "+message);
-		if (this.isEnabled()){this.setEnabled(false);
+		if (this.isEnabled()){this.getServer().getPluginManager().disablePlugin(this);
 		amcLogger.severe("["+amcPdf.getName()+"] WARNING Plugin auto disable triggered.");}}
 		
-	//Initialize player, check variables are set, if not set set default or load from save file
-	// TODO create load system in this function
-	public boolean initPlayerRadio(Player player){
-		if (!playerRadioOn.contains(player.getDisplayName()) && varRadioAutoOn){
-			logMessage("Player's radio has been set to auto on per config.yml");
+	public void loadPlayerRadioSettings(Player player){
+		boolean playerHasSettings;		
+		Map<String, Object> playerSetting = new HashMap<String,Object>();
+		if (playerRadioConfig.isConfigurationSection(player.getDisplayName())){
+			playerHasSettings=true;
+			playerSetting = playerRadioConfig.getConfigurationSection(player.getDisplayName()).getValues(true);
+		} 
+		else{
+			playerHasSettings=false;
+		}
+		
+		
+		//I'm not sure if type casting is safe
+		//if some developer reads this drop me a hint at a better way to do .yml settings
+		//TODO: Figure out where to put Validation for channel, codes and cutoff settings.
+		
+		if (playerHasSettings && playerSetting.containsKey("radio")){			
+			if(!isRadioOn(player)&&((Boolean) playerSetting.get("radio"))){togglePlayerRadio(player);}
+		} else if (!isRadioOn(player) && varRadioAutoOn){
 			togglePlayerRadio(player);
 		}
-		logMessage(player.getDisplayName());
-		logMessage("Freq: " + getPlayerRadioChannel(player));
-		logMessage("Code: " + getPlayerRadioCode(player));
-		logMessage("Mic Open: " + getPlayerMic(player));
-		logMessage("Filter Enabled: " + getPlayerFilter(player));
-		logMessage("Cutoff: "+ getPlayerCutoff(player));		
-		return true;
+		
+		if(playerHasSettings && playerSetting.containsKey("freq")){
+			tunePlayerRadioChannel(player, (Integer) playerSetting.get("freq"));
+		} else {
+			tunePlayerRadioChannel(player,varRadioDefFreq);
+		}
+		
+		if(playerHasSettings && playerSetting.containsKey("code")){
+			setPlayerRadioCode(player,(Integer) playerSetting.get("code"));
+		} else {
+			setPlayerRadioCode(player, 0);
+		}
+		
+		if(playerHasSettings && playerSetting.containsKey("mic")){
+			setPlayerMic(player, (Boolean) playerSetting.get("mic"));
+		} else {
+			setPlayerMic(player, true);
+		}
+		
+		if(playerHasSettings && playerSetting.containsKey("filter")){
+			setPlayerFilter(player, (Boolean) playerSetting.get("filter"));
+		} else {
+			setPlayerFilter(player, false);
+		}
+			
+		if(playerHasSettings && playerSetting.containsKey("cutoff")){
+			setPlayerRadioCutoff(player, (Integer) playerSetting.get("cutoff"));
+		} else {
+			setPlayerRadioCutoff(player, varRadioMaxCuttoff);
+		}
+		
+		if (playerHasSettings && playerSetting.containsKey("link")){
+			setPlayerLinkID(player, (String) playerSetting.get("link"));
+		} else {
+			setPlayerLinkID(player, "none");
+		}
+		
+		if(!playerHasSettings){
+			this.savePlayerRadioSettings(player);
+		}
 	}
 	
+	public void savePlayerRadioSettings(Player player){
+	//Map<String, Object> playerSettings = new HashMap<String,Object>();
+	Map<String, Object> playerSetting = new HashMap<String,Object>();
+	playerSetting.put("radio",isRadioOn(player));
+	playerSetting.put("freq",getPlayerRadioChannel(player));	
+	playerSetting.put("code",getPlayerRadioCode(player));
+	playerSetting.put("mic",getPlayerMic(player));
+	playerSetting.put("filter",getPlayerFilter(player));
+	playerSetting.put("cutoff",getPlayerCutoff(player));
+	playerSetting.put("link",getPlayerLinkID(player));
+	//playerSettings.put(player.getDisplayName(), playerSetting);
+	//playerRadioConfig.createSection("radio-settings",playerSettings);
+	playerRadioConfig.createSection(player.getDisplayName(), playerSetting);
+	this.saveConfigPlayerRadioSettings();
+	}
+	
+	public String getPlayerLinkID(Player player) {
+		if (!playerRadioLinkID.containsKey(player)){
+			setPlayerLinkID(player,"none");
+			}
+		return playerRadioLinkID.get(player);
+	}
+	
+	public void setPlayerLinkID(Player player,String linkID){
+		if(linkID.isEmpty()){linkID="none";}
+		amcTools.msgToPlayer(player, "[Link]: ",linkID);
+		this.playerRadioLinkID.put(player, linkID);
+	}
+
 	//Return the Max Chat Distance
 	public double getMaxChat(){
 		
@@ -290,6 +389,9 @@ public class AMChat extends JavaPlugin {
 	// if the mic is on will return true
 	// if the mic is off will return false
 	// if the value is null, will set the mic to true and return true
+	public void setPlayerMic(Player player,boolean b){
+		playerRadioMic.put(player, b);
+	}
 	public boolean getPlayerMic(Player player){
 		if(playerRadioMic.containsKey(player)){
 			return playerRadioMic.get(player);			
@@ -303,6 +405,10 @@ public class AMChat extends JavaPlugin {
 	// if the filter is on will return true
 	// if the filter is off will return false
 	// if the value is null will set the filter to false and return that
+	public void setPlayerFilter(Player player, boolean b){
+		playerRadioFilter.put(player, b);
+	}
+	
 	public boolean getPlayerFilter(Player player){
 		if(playerRadioFilter.containsKey(player)){
 			return playerRadioFilter.get(player);			
@@ -323,10 +429,14 @@ public class AMChat extends JavaPlugin {
 		}
 	}
 
+	//Instead of slamming the main object with compares we do all that stuff here
 	public boolean canReceive(Player sender, Player player) {
 		if (sender.equals(player)){
 			//seriously, nah just kidding yeah the player can hear them self. 
-			return true;}
+			return true;}		
+			//If the player receiving the message is a op or has the below permission they can hear everything.
+		if (player.hasPermission("amchat.radio.hearall")||player.isOp()){return true;}
+			
 		if(!isRadioOn(player)){
 			//The player doesn't even have his radio on
 			return false;} 
@@ -350,18 +460,39 @@ public class AMChat extends JavaPlugin {
 		return true;
 	}	
 	
-	public boolean canRead(Player sender, Player player) {		
-		if (sender.equals(player)){return true;}
+	//same logic for checking if players can receive is implied here.
+	public boolean canRead(Player sender, Player player) {
+		//Sender is Receiver
+		if (sender.equals(player)){return true;}	
+		//Sender is not encrypting chat
 		if (playerRadioCode.get(sender)==0){return true;}
+		//Receiver has read all permission
+		if (player.hasPermission("amchat.radio.readall")||player.isOp()){return true;}
+		//the player and receiver are on the same channel with the same key
 		if((playerRadioCode.get(sender) == playerRadioCode.get(player))&&(playerRadioChannel.get(sender) == playerRadioChannel.get(player))){return true;} 
 		return false;
 	}
+	
+	public boolean canPing(Player sender, Player player) {
+		if(varLimitRadioChat){
+			if(amcTools.getDistance(sender.getLocation(), player.getLocation()) > varRadioMaxChatDist){
+				return false;
+				}
+			}
+		return true;
+	}
 
 	public void playerRadioPing(Player sender, Player player) {
-		String pingMessage = "*PING*"+amcTools.createMessage(player, ChatColor.YELLOW+"*PING*");
+		//This works pretty simple, we use the message format to show our information
+		//TODO:Add Range Check
+		String senderInfo = "Frequency:"+ getPlayerRadioChannel(player) + this.varRadioFreqSuffix + " Code:"+getPlayerRadioCode(player);
+		String pingMessage = "*PING*"+amcTools.createMessage(player, ChatColor.YELLOW +senderInfo+"*PING*");
 		amcTools.msgToPlayer(player, pingMessage);
+		if (canPing(sender,player)){
 		amcTools.msgToPlayer(sender, pingMessage);
+		}
 		
 	}
 	
-}
+	
+}//EOF

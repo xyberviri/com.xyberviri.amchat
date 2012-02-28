@@ -1,8 +1,6 @@
 package com.xyberviri.amchat;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -11,11 +9,9 @@ import org.bukkit.entity.Player;
 
 public class AMChatCmd implements CommandExecutor {
 	AMChat amcMain;
-	private boolean amChatCmLoaded=false;
 	
 	AMChatCmd(AMChat amcMain){
 		this.amcMain = amcMain;
-		this.amChatCmLoaded=true;
 	}
 	
 	@Override
@@ -49,36 +45,42 @@ public class AMChatCmd implements CommandExecutor {
 		//AM command branch
 		if (cmd.getName().equalsIgnoreCase("am")){
 			
-
-		if (cmd.getName().equalsIgnoreCase("am") && args.length == 0){
+			
+		//am
+		if (player.hasPermission("amchat.radio.personal.use") && args.length == 0){
 			amcMain.amcTools.msgToPlayer(player,"[-Xmit-Freq-]:"," "+amcMain.getPlayerRadioChannel(player));
 			amcMain.amcTools.msgToPlayer(player,"[-Xmit-Code-]:"," "+amcMain.getPlayerRadioCode(player));
-			amcMain.amcTools.msgToPlayer(player,"[--Mic-Open-]:"," "+amcMain.getPlayerMic(player));
+			amcMain.amcTools.msgToPlayer(player,"[-Xmit-Link-]:"," "+amcMain.getPlayerLinkID(player));
 			amcMain.amcTools.msgToPlayer(player,"[--Cut-Off--]:"," "+amcMain.getPlayerCutoff(player));
-			amcMain.amcTools.msgToPlayer(player,"[--Filter---]:"," "+amcMain.getPlayerFilter(player));			
+			amcMain.amcTools.msgToPlayer(player,"[--Mic-Open-]:"," "+amcMain.getPlayerMic(player));
+			amcMain.amcTools.msgToPlayer(player,"[--Filter---]:"," "+amcMain.getPlayerFilter(player));
 			return true;
 		}
 		
-		if(cmd.getName().equalsIgnoreCase("am") && args[0].equalsIgnoreCase("radio") && args.length == 1){
+		//am radio
+		if(player.hasPermission("amchat.radio.personal.radio") && args[0].equalsIgnoreCase("radio") && args.length == 1){
 			amcMain.togglePlayerRadio(player);
 			return true;
 		}
 		
-		if(cmd.getName().equalsIgnoreCase("am") && args[0].equalsIgnoreCase("mic") && args.length == 1){
+		//am mic
+		if(player.hasPermission("amchat.radio.personal.mic") && args[0].equalsIgnoreCase("mic") && args.length == 1){
 			amcMain.togglePlayerMic(player);
 			return true;
 		}
 		
-		if(cmd.getName().equalsIgnoreCase("am") && args[0].equalsIgnoreCase("filter") && args.length == 1){
+		//am filter
+		if(player.hasPermission("amchat.radio.personal.filter") && args[0].equalsIgnoreCase("filter") && args.length == 1){
 			amcMain.togglePlayerFilter(player);
 			return true;
 		}
 		
-		if(cmd.getName().equalsIgnoreCase("am") && args[0].equalsIgnoreCase("tune") && args.length == 2){
+		//am tune <#>
+		if(player.hasPermission("amchat.radio.personal.tune") && args[0].equalsIgnoreCase("tune") && args.length == 2){
 			try{ 
 				Integer targetValue = Integer.parseInt(args[1]);
 				
-				if((targetValue<amcMain.varRadioMinFreq || targetValue>amcMain.varRadioMaxFreq)&&(!player.isOp())){
+				if((targetValue<amcMain.varRadioMinFreq || targetValue>amcMain.varRadioMaxFreq)&&(!player.hasPermission("amchat.radio.override.tune"))&&(!player.isOp())){
 					amcMain.amcTools.errorToPlayer(player,"Valid Frequencies are "+amcMain.varRadioMinFreq+"-"+amcMain.varRadioMaxFreq);
 					return true;
 				}				
@@ -86,44 +88,53 @@ public class AMChatCmd implements CommandExecutor {
 				return true;
 			} catch (NumberFormatException e){
 				amcMain.amcTools.errorToPlayer(player,args[1] + "is not a number!");
-				return false;
+				return true;
 				}
 		}		
 		
-		
-		if(cmd.getName().equalsIgnoreCase("am") && args[0].equalsIgnoreCase("code") && args.length == 2){
+		//am code <#>
+		if(player.hasPermission("amchat.radio.personal.code") && args[0].equalsIgnoreCase("code") && args.length == 2){
 			try{ 
 				Integer targetValue = Integer.parseInt(args[1]);
-				if(targetValue>amcMain.varRadioMaxCode&&(!player.isOp())){
+				
+				if ((targetValue<0)&&(!player.hasPermission("amchat.radio.override.code")))
+				{targetValue=0;}
+				
+				if ((targetValue>amcMain.varRadioMaxCode)&&(!player.hasPermission("amchat.radio.override.code"))){
 					amcMain.amcTools.errorToPlayer(player,"Valid Code is 0-"+amcMain.varRadioMaxCode);
-					return true;
+					return true;					
 				}
+				
+ 
 				amcMain.setPlayerRadioCode(player, targetValue);
 				return true;
 			} catch (NumberFormatException e){
 				amcMain.amcTools.errorToPlayer(player,args[1] + "is not a number!");
-				return false;
+				return true;
 				}
 		}		
 
-		
-		if(cmd.getName().equalsIgnoreCase("am") && args[0].equalsIgnoreCase("cutoff") && args.length == 2){
+		//am cutoff <#>
+		if(player.hasPermission("amchat.radio.personal.cutoff") && args[0].equalsIgnoreCase("cutoff") && args.length == 2){
 			try{ 
 				Integer targetValue = Integer.parseInt(args[1]);
-				if(targetValue>amcMain.varRadioMaxCuttoff&&(!player.isOp())){
+				if((targetValue>amcMain.varRadioMaxCuttoff)&&(!player.hasPermission("amchat.radio.override.cutoff"))&&(!player.isOp())){
 					amcMain.amcTools.errorToPlayer(player,"Valid Cutoff is 0-"+amcMain.varRadioMaxCuttoff);
 					return true;
-				}
+				} else if (targetValue<0){
+					amcMain.amcTools.errorToPlayer(player,"Valid Cutoff is 0-"+amcMain.varRadioMaxCuttoff);
+					targetValue=0;
+					}
 				amcMain.setPlayerRadioCutoff(player, targetValue);
 				return true;
 			} catch (NumberFormatException e){
 				amcMain.amcTools.errorToPlayer(player,args[1] + "is not a number!");
-				return false;
+				return true;
 				}
 		}		
 		
-		
-		if(cmd.getName().equalsIgnoreCase("am") && args[0].equalsIgnoreCase("home") && args.length == 1){
+		//am home
+		if(player.hasPermission("amchat.radio.personal.home") && args[0].equalsIgnoreCase("home") && args.length == 1){
 			if(!amcMain.isRadioOn(player)){
 				amcMain.togglePlayerRadio(player);
 			}
@@ -139,11 +150,12 @@ public class AMChatCmd implements CommandExecutor {
 			return true;
 		}			
 		
-		if(cmd.getName().equalsIgnoreCase("am") && args[0].equalsIgnoreCase("ping") && args.length == 2){
+		//am ping
+		if(player.hasPermission("amchat.radio.personal.ping") && args[0].equalsIgnoreCase("ping") && args.length == 2){
 			Player other = Bukkit.getServer().getPlayer(args[1]);
 	        if (other == null) {
 	        	amcMain.amcTools.errorToPlayer(player, args[1] + " is not online!");
-	        	return false;
+	        	return true;
 	        }
 			amcMain.playerRadioPing(player,other);
 			return true;

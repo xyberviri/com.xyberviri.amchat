@@ -9,16 +9,21 @@ public class AMChatRadio {
 	AMChatRadioManager amcRadMan;		//	Handle to Radio Manager
 	
 	private String 		varRadioName;		//	What is this Radio's Handle KXAN for example
-	private Location	varRadioLoc;		//	Where do i exist in 4d space. 
-	private String		varRadioSerial;		//	This is my Serial number, its given to me by the Radio Manager.
 	private String 		varRadioOwner;		//	Who owns me
+	private Location	varRadioLoc;		//	Where do i exist in 4d space. 
 	private int 		varRadioChannel;	//	What Channel are we transmitting on
 	private int			varRadioCode;		//	What Code are we using to encrypt chat, 0 is disabled.
 	private String 		varRadioLinkPass;	//	What password does some one need to enter so they can join
+	
 	private double		varRadioRange;		//	How far do i reach.
 	private int			varRadioAntHt;		//	How Tall is my antenna.
 	private boolean		varRadioIsValid;	//	Is this radio valid? Can it Transmit?
 	private boolean		varRadioIsAdmin;	//	Is this a admin radio?
+	
+	private int			varRadioIBlocks;	//	Iron blocks
+	private int			varRadioGBlocks;	//	Gold blocks
+	private int			varRadioDBlocks;	//	Diamond
+	private int			varRadioOBlocks;	//	Obsidian
 	
 	//TODO: Admin Radio
 	//TODO: Player Radio
@@ -35,8 +40,15 @@ public class AMChatRadio {
 	
 	AMChatRadio(AMChatRadioManager amChatRadioManager){
 		this.amcRadMan = amChatRadioManager;
+		varRadioRange=0.0;		//	How far do i reach.
+		varRadioAntHt=0;		//	How Tall is my antenna.
+		varRadioIsValid=false;	//	Is this radio valid? Can it Transmit?
+		varRadioIsAdmin=false;	//	Is this a admin radio?
+		varRadioIBlocks=0;	//	Iron blocks
+		varRadioGBlocks=0;	//	Gold blocks
+		varRadioDBlocks=0;	//	Diamond
+		varRadioOBlocks=0;	//	Obsidian
 		}
-	
 	
 //	//This is the handle that another Radio is using to send us a relay message
 //	public void rRelay(AMChatRelayPacket amcRelayPacket){
@@ -48,9 +60,14 @@ public class AMChatRadio {
 //	private void sendRelay(AMChatRelayPacket amcRelayPacket){
 //		
 //	}
-	
 
+	//Is this a valid Radio tower should we talk to it, does it work.
+	public boolean isValid() {if (varRadioIsAdmin){return true;} else {return varRadioIsValid;}}
 	
+	//Getter/Setter:Admin Flag
+	public boolean isAdmin(){return varRadioIsAdmin;}
+	public void setAdmin(boolean b){this.varRadioIsAdmin=b;}
+
 	//Getter/Setter:Owner
 	public String getOwner() {return varRadioOwner;}
 	public void setOwner(String varRadioOwner) {this.varRadioOwner = varRadioOwner;}
@@ -84,11 +101,26 @@ public class AMChatRadio {
 		}
 	
 
-	//Get Members
+	//Get/Add/Del Members
 	public ArrayList<String> getMembers() {return radioMembers;}
+	public boolean addMember(String radioMember) {
+		if(!this.radioMembers.contains(radioMember)){
+			this.radioMembers.add(radioMember);
+			return true;
+			} 
+		return false;		
+	}
+	public boolean delMember(String radioMember) {
+		if (this.radioMembers.contains(radioMember)){
+			this.radioMembers.remove(radioMember);
+			return true;
+			}
+		return false;
+	}
 	
 	//Get/Add/Del Admins
 	public ArrayList<String> getAdmins(){return radioAdmins;}
+	
 	public boolean addAdmin(String radioMember) {
 		if(!this.radioAdmins.contains(radioMember)){
 			this.radioAdmins.add(radioMember);
@@ -103,6 +135,27 @@ public class AMChatRadio {
 			}
 		return false;
 	}
+	
+	//Get/Add/Del Network Partners.
+	public boolean isRadioNeworkPartner(AMChatRadio otherRadio) {
+		return radioNetwork.contains(otherRadio);
+		}
+	
+	public boolean setRadioNetworkPartner(AMChatRadio otherRadio) {
+		if (!radioNetwork.contains(otherRadio)){
+			this.radioNetwork.add(otherRadio);
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean unsetRadioNetworkPartner(AMChatRadio otherRadio) {
+		if (radioNetwork.contains(otherRadio)){
+			this.radioNetwork.remove(otherRadio);
+			return true;
+		}
+		return false;
+	}	
 	
 	
 }

@@ -6,33 +6,40 @@ commands:
    am:
       description: display information about your radio
       permission: amchat.radio.personal.use
-      usage: Usage: /am
+      usage: Usage /am
    am radio:
       description: toggles your radio on off 
       permission: amchat.radio.personal.radio
-      usage: Usage: /am radio
+      usage: Usage /am radio
    am mic:
       description: toggles your mic on off
       permission: amchat.radio.personal.mic
-      usage: Usage: /am mic
+      usage: Usage /am mic
    am filter:
       description: toggles your filter on off
       permission: amchat.radio.personal.filter
-      usage: Usage: /am filter      
+      usage: Usage /am filter      
    am tune:
       description: Tunes personal radio to a specific channel
       permission: amchat.radio.personal.tune
-      usage: Usage: /am tune <#>
+      usage: Usage /am tune #
    am code:
       description: Sets the encryption code before transmission 0 to disable
       permission: amchat.radio.personal.code
-      usage: Usage: /am code <#>
+      usage: Usage /am code #
    am cutoff:
       description: adjust your cutoff
       permission: amchat.radio.personal.cutoff
-      usage: Usage: /am cutoff <#>
+      usage: Usage /am cutoff #
    am home:
       description: Reset your radio to the default
       permission: amchat.radio.personal.home
-      usage: Usage: /am home
-      
+      usage: Usage /am home
+   am ping:
+      description: send your info to another player
+      permission: amchat.radio.personal.ping
+      usage: Usage /am ping playername
+   xm:
+      description: display information about your fixed radio towers
+      permission: amchat.radio.fixed.use
+      usage: Usage /xm

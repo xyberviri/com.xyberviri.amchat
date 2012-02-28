@@ -22,14 +22,14 @@ public class AMChatListener implements Listener {
     
     @EventHandler
     public void onPlayerLogin(PlayerLoginEvent event){
-    		Player player = event.getPlayer();
-    		this.amcMain.initPlayerRadio(player);
+    		//Player player = event.getPlayer();
+    		//this.amcMain.loadPlayerRadioSettings(player);
     }
 
     @EventHandler
     public void onPlayerLogout(PlayerQuitEvent event){
-    		//Player player = event.getPlayer();
-    		//this.amcMain.initPlayerRadio(player);    	
+    		Player player = event.getPlayer();
+    		amcMain.savePlayerRadioSettings(player);
     }
 
 	public boolean isLoaded(AMChat amcMainPlugin) {
