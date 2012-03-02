@@ -475,7 +475,9 @@ public class AMChat extends JavaPlugin {
 		//Receiver has read all permission
 		if (player.hasPermission("amchat.radio.readall")||player.isOp()){return true;}
 		//the player and receiver are on the same channel with the same key
-		if((playerRadioCode.get(sender) == playerRadioCode.get(player))&&(playerRadioChannel.get(sender) == playerRadioChannel.get(player))){return true;} 
+		if((playerRadioCode.get(sender).equals(playerRadioCode.get(player)))&&(playerRadioChannel.get(sender).equals(playerRadioChannel.get(player)))){
+			return true;
+		} 
 		return false;
 	}
 	
