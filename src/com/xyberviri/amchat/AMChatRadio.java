@@ -32,20 +32,24 @@ public class AMChatRadio {
 	// Admin List returns Server Operator List 
 	// Name Checks are Disabled
 	
-	private ArrayList<String> radioMembers = new ArrayList<String>();
-	private ArrayList<String> radioAdmins = new ArrayList<String>();
-	private ArrayList<AMChatRadio> radioNetwork = new ArrayList<AMChatRadio>(); //These are radios that are linked to me
+	private ArrayList<String> radioMembers;
+	private ArrayList<String> radioAdmins;
+	private ArrayList<AMChatRadio> radioNetwork; //These are radios that are linked to me
 	
 	AMChatRadio(AMChatRadioManager amChatRadioManager){
 		this.amcRadMan = amChatRadioManager;
-		varRadioRange=0.0;		//	How far do i reach.
+		this.radioMembers = new ArrayList<String>();
+		this.radioAdmins = new ArrayList<String>();
+		this.radioNetwork = new ArrayList<AMChatRadio>();
+		
+		setVarRadioRange(0.0);		//	How far do i reach.
 		varRadioAntHt=0;		//	How Tall is my antenna.
 		varRadioIsValid=false;	//	Is this radio valid? Can it Transmit?
 		varRadioIsAdmin=false;	//	Is this a admin radio?
-		varRadioIBlocks=0;	//	Iron blocks
-		varRadioGBlocks=0;	//	Gold blocks
-		varRadioDBlocks=0;	//	Diamond
-		varRadioOBlocks=0;	//	Obsidian
+		varRadioIBlocks=0;		//	Iron blocks
+		varRadioGBlocks=0;		//	Gold blocks
+		varRadioDBlocks=0;		//	Diamond
+		varRadioOBlocks=0;		//	Obsidian
 		}
 	
 //	//This is the handle that another Radio is using to send us a relay message
@@ -61,6 +65,7 @@ public class AMChatRadio {
 
 	//Is this a valid Radio tower should we talk to it, does it work.
 	public boolean isValid() {if (varRadioIsAdmin){return true;} else {return varRadioIsValid;}}
+	public void setValid(boolean b){this.varRadioIsValid=b;}
 	
 	//Getter/Setter:Admin Flag
 	public boolean isAdmin(){return varRadioIsAdmin;}
@@ -153,6 +158,14 @@ public class AMChatRadio {
 			return true;
 		}
 		return false;
+	}
+
+	public double getRange() {
+		return varRadioRange;
+	}
+
+	public void setVarRadioRange(double varRadioRange) {
+		this.varRadioRange = varRadioRange;
 	}	
 	
 	
