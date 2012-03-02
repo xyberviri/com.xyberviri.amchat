@@ -66,5 +66,9 @@ Change Chat router to use methods instead of direct var access, there are still 
 Added Radio Link ID varible in AMChat main, Added Setter(will set to "none" on empty string)/added Getter method for varible.
 Removed world check for amTools.getDistance
 Added public method AMChatRadioManager.genSerial, this generates a serial number for radios
+Added Custom Config for player radio settings>in pl.settings.yml
+Added method to load/save player settings, these save between server restarts. 
+Added Custom Config for fixed radio settings>rm.settings.yml
+
 
 

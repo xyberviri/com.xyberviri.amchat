@@ -1,7 +1,6 @@
 package com.xyberviri.amchat;
 
 import java.util.ArrayList;
-
 import org.bukkit.Location;
 import org.bukkit.World;
 
@@ -14,16 +13,15 @@ public class AMChatRadio {
 	private int 		varRadioChannel;	//	What Channel are we transmitting on
 	private int			varRadioCode;		//	What Code are we using to encrypt chat, 0 is disabled.
 	private String 		varRadioLinkPass;	//	What password does some one need to enter so they can join
-	
-	private double		varRadioRange;		//	How far do i reach.
-	private int			varRadioAntHt;		//	How Tall is my antenna.
-	private boolean		varRadioIsValid;	//	Is this radio valid? Can it Transmit?
-	private boolean		varRadioIsAdmin;	//	Is this a admin radio?
-	
-	private int			varRadioIBlocks;	//	Iron blocks
-	private int			varRadioGBlocks;	//	Gold blocks
-	private int			varRadioDBlocks;	//	Diamond
-	private int			varRadioOBlocks;	//	Obsidian
+
+	private double	varRadioRange;		//	How far do i reach.
+	private int		varRadioAntHt;		//	How Tall is my antenna.
+	private boolean	varRadioIsValid;	//	Is this radio valid? Can it Transmit?
+	private boolean	varRadioIsAdmin;	//	Is this a admin radio?
+	private int		varRadioIBlocks;	//	Iron blocks
+	private int		varRadioGBlocks;	//	Gold blocks
+	private int		varRadioDBlocks;	//	Diamond
+	private int		varRadioOBlocks;	//	Obsidian
 	
 	//TODO: Admin Radio
 	//TODO: Player Radio
@@ -90,19 +88,16 @@ public class AMChatRadio {
 
 	//Getter/Setter:Location
 	public Location getLoc() {return varRadioLoc;}
-	public void setLoc(Location varRadioLoc) {
-		this.varRadioLoc = varRadioLoc;
-		}	
-	public void setLoc(World world,Double locX,Double locY,Double locZ) {
-		this.varRadioLoc = new Location(world, locX, locY, locZ);
-		}		
-	public void setLoc(String world,Double locX,Double locY,Double locZ) {
-		this.varRadioLoc = new Location(this.amcRadMan.amcMain.getServer().getWorld(world), locX, locY, locZ);
-		}
+	public void setLoc(Location varRadioLoc) {this.varRadioLoc=varRadioLoc;}	
+	public void setLoc(World world,Double locX,Double locY,Double locZ) {this.varRadioLoc = new Location(world, locX, locY, locZ);	}		
+	public void setLoc(String world,Double locX,Double locY,Double locZ) {this.varRadioLoc = new Location(this.amcRadMan.amcMain.getServer().getWorld(world), locX, locY, locZ);}
 	
 
-	//Get/Add/Del Members
+	//Get/Set/Add/Del Members
 	public ArrayList<String> getMembers() {return radioMembers;}
+	public void setMembers(ArrayList<String>radioMembers){
+		this.radioMembers=radioMembers;
+		}
 	public boolean addMember(String radioMember) {
 		if(!this.radioMembers.contains(radioMember)){
 			this.radioMembers.add(radioMember);
@@ -118,8 +113,11 @@ public class AMChatRadio {
 		return false;
 	}
 	
-	//Get/Add/Del Admins
+	//Get/Set/Add/Del Admins
 	public ArrayList<String> getAdmins(){return radioAdmins;}
+	public void setAdmins(ArrayList<String>radioAdmins){
+		this.radioAdmins=radioAdmins;
+		}
 	
 	public boolean addAdmin(String radioMember) {
 		if(!this.radioAdmins.contains(radioMember)){

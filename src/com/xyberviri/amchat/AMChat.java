@@ -174,15 +174,15 @@ public class AMChat extends JavaPlugin {
 		boolean playerHasSettings;		
 		Map<String, Object> playerSetting = new HashMap<String,Object>();
 		if (playerRadioConfig.isConfigurationSection(player.getDisplayName())){
-			playerHasSettings=true;
 			playerSetting = playerRadioConfig.getConfigurationSection(player.getDisplayName()).getValues(true);
+			playerHasSettings=true;
 		} 
 		else{
+			logMessage("No Saved settings for player, loading defaults");
 			playerHasSettings=false;
 		}
 		
 		
-		//I'm not sure if type casting is safe
 		//if some developer reads this drop me a hint at a better way to do .yml settings
 		//TODO: Figure out where to put Validation for channel, codes and cutoff settings.
 		
@@ -229,7 +229,7 @@ public class AMChat extends JavaPlugin {
 		}
 		
 		if(!playerHasSettings){
-			this.savePlayerRadioSettings(player);
+			savePlayerRadioSettings(player);
 		}
 	}
 	
@@ -246,7 +246,7 @@ public class AMChat extends JavaPlugin {
 	//playerSettings.put(player.getDisplayName(), playerSetting);
 	//playerRadioConfig.createSection("radio-settings",playerSettings);
 	playerRadioConfig.createSection(player.getDisplayName(), playerSetting);
-	this.saveConfigPlayerRadioSettings();
+	saveConfigPlayerRadioSettings();
 	}
 	
 	public String getPlayerLinkID(Player player) {
@@ -257,7 +257,9 @@ public class AMChat extends JavaPlugin {
 	}
 	
 	public void setPlayerLinkID(Player player,String linkID){
-		if(linkID.isEmpty()){linkID="none";}
+		if(linkID.isEmpty()){
+			linkID="none";
+			}
 		amcTools.msgToPlayer(player, "[Link]: ",linkID);
 		this.playerRadioLinkID.put(player, linkID);
 	}
@@ -437,9 +439,13 @@ public class AMChat extends JavaPlugin {
 			//If the player receiving the message is a op or has the below permission they can hear everything.
 		if (player.hasPermission("amchat.radio.hearall")||player.isOp()){return true;}
 			
-		if(!isRadioOn(player)){
-			//The player doesn't even have his radio on
+		if(!isRadioOn(player)){//The player doesn't even have his radio on			
 			return false;} 
+		
+		if(!sender.getWorld().equals(player.getWorld())){ //we can't talk to the other side.
+			return false;
+		}
+		
 		if (playerRadioChannel.get(sender) < (playerRadioChannel.get(player) - playerRadioCutoff.get(player)) ){
 			//Radio chat is below cutoff limit
 			return false;

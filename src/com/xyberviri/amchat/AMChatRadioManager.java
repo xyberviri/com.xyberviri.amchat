@@ -1,16 +1,12 @@
 package com.xyberviri.amchat;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+
+import com.xyberviri.util.XYCustomConfig;
 
 
 
@@ -22,87 +18,97 @@ public class AMChatRadioManager {
 	private Map <Player, Boolean> 		amIsBuilding;		//Is the player building a radio?
 	//private Map <Player, Integer> 		amRadioStep;		//What step is the player at in construction of a tower. 
 	//this.amRadioStep = new HashMap<Player,Integer>();
-
+	private XYCustomConfig radioConfig;
 	
-	private FileConfiguration radioConfig=null; 			//Configuration handle for Radio Manager
-	private File radioConfigFile = null;					//File where we store all the radio data.
+	
 	
 	AMChatRadioManager(AMChat amchat){
 		this.amcMain = amchat;
 		this.amRadioList = new ArrayList<AMChatRadio>();
 		this.amRadioHandles = new HashMap<String, AMChatRadio>();
 		this.amIsBuilding = new HashMap<Player,Boolean>();
-		this.radioConfig = getRadioConfig();
+		this.radioConfig = new XYCustomConfig(amcMain,"rm.settings.yml");
+		
+		//if(radioConfig.get().isConfigurationSection("KX05")){
+//			Map<String, Object> radioSettings = radioConfig.get().getValues(true);
+//			for (Map.Entry<String, Object> entry: radioSettings.entrySet()) {
+//				amcMain.logMessage(entry.getKey()+": "+entry.getValue());
+//			}
+//			amcMain.logMessage("SUCCESS!!");
+		//}
 
 		
-		amcRadManFileTest("KX09");
-		amcRadManFileTest("PD17");
-		amcRadManFileTest("PX12");
-		amcRadManFileTest("CD05");
-		amcRadManFileTest("ZX00");
-		saveRadioConfig();
+//		amcRadManSerializationTest("KX05");
+//		amcRadManSerializationTest("PD13");
+//		amcRadManSerializationTest("PX12");
+//		amcRadManSerializationTest("CD01");
+//		amcRadManSerializationTest("ZX02");
+//
+//		amcMain.logMessage("Total Radio Objects: "+amRadioList.size());
+		//radioConfig.saveToDisk();
 		
 	}
 	
-	public void amcRadManFileTest(String varString){
-		amcMain.logMessage("AMCRadManFileTest: "+varString);
+
+	 
+	 
+	public void amcRadManSerializationTest(String varString){
+		AMChatRadio newRadio = new AMChatRadio(this);
+		String varNewRadioHandle = genRadioID(false);
+
+		newRadio.setName(varNewRadioHandle);
+		newRadio.setOwner(varString+" owner");
+		//newRadio.setLoc("world",0.0,0.0,0.0);
+		newRadio.setChan(1);
+		newRadio.setCode(0);
+		newRadio.setPass("pass");		
+		newRadio.addMember("Member1");
+		newRadio.addMember("Member2");
+		newRadio.addAdmin("Member1");
+		
+
+		amRadioList.add(newRadio);
+		amRadioHandles.put(varNewRadioHandle, newRadio);
+	}
+	
+//	public void amcRadManFileTest(String varString){
+//		amcMain.logMessage("AMCRadManFileTest: "+varString);
+//		Map<String, Object> radioSettings = new HashMap<String,Object>();
+//		radioSettings.put("name", varString);
+//		radioSettings.put("owner", "Xyberviri");
+//		radioSettings.put("freq", "100");
+//		radioSettings.put("code", "0");
+//		radioSettings.put("pass", "none");
+//		radioSettings.put("locw", "nether");
+//		radioSettings.put("locx", "0");
+//		radioSettings.put("locy", "64");
+//		radioSettings.put("locz", "0");
+//		ArrayList<String> radioMembers = new ArrayList<String>();
+//		ArrayList<String> radioAdmins = new ArrayList<String>();
+//		radioAdmins.add("Xyberviri");
+//		radioMembers.add("Xyberviri");
+//		radioMembers.add("rumblegoat");
+//		radioSettings.put("admins", radioAdmins);
+//		radioSettings.put("members", radioMembers);
+//		radioConfig.get().createSection(varString, radioSettings);
+//		radioConfig.saveToDisk();
+//
+//	}
+
+	public void loadRadioSettings(){
+		
+	}
+	//This creates a radio from a Object Map
+	private void createRadio(Map<String,Object> radioSettings){
+		
+	}
+	
+	public void saveRadioSettings(){
+		
+	}
+	//This creates the Object Map from a Radio
+	private Map<String, Object> createRadioSettings(AMChatRadio amcRadio){
 		Map<String, Object> radioSettings = new HashMap<String,Object>();
-		radioSettings.put("name", varString);
-		radioSettings.put("owner", "Xyberviri");
-		radioSettings.put("freq", "100");
-		radioSettings.put("code", "0");
-		radioSettings.put("pass", "none");
-		radioSettings.put("locw", "world");
-		radioSettings.put("locx", "0");
-		radioSettings.put("locy", "64");
-		radioSettings.put("locz", "0");
-		ArrayList<String> radioMembers = new ArrayList<String>();
-		ArrayList<String> radioAdmins = new ArrayList<String>();
-		radioAdmins.add("Xyberviri");
-		radioMembers.add("Xyberviri");
-		radioMembers.add("rumblegoat");
-		radioSettings.put("admins", radioAdmins);
-		radioSettings.put("members", radioMembers);
-		radioConfig.createSection(varString, radioSettings);
-		this.saveRadioConfig();
-	}
-
-	//Radio configuration file reload from disk
-	//Create files missing from data folder. 
-	public void reloadRadioConfig(){
-		if(radioConfigFile==null){
-			radioConfigFile=new File(amcMain.getDataFolder(),"rm.settings.yml");
-		}
-		
-		radioConfig = YamlConfiguration.loadConfiguration(radioConfigFile);
-		InputStream defConfigStream = amcMain.getResource("rm.settings.yml");
-		
-		if (defConfigStream != null) {
-			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-			radioConfig.setDefaults(defConfig);
-	}}
-	
-	public FileConfiguration getRadioConfig(){
-		if (radioConfig==null){
-			reloadRadioConfig();
-			}
-		return radioConfig;			
-	}
-	
-	public void saveRadioConfig(){
-		if (radioConfigFile==null||radioConfig==null){
-			amcMain.logMessage("unable to save rm.settings.yml, Config or file is null");
-			return;}
-		try{
-			radioConfig.save(radioConfigFile);
-			amcMain.logMessage("Saving radio settings file");
-		} catch (IOException ex){
-			amcMain.logMessage("Could not save radio setting file "+radioConfigFile+" IOexception " + ex.toString());
-		}
-	}
-	
-	public void saveRadioSettings(AMChatRadio amcRadio){
-		//Map<String, Object> playerSettings = new HashMap<String,Object>();
 //		Map<String, Object> playerSetting = new HashMap<String,Object>();
 //		playerSetting.put("radio",isRadioOn(player));
 //		playerSetting.put("freq",getPlayerRadioChannel(player));	
@@ -115,11 +121,10 @@ public class AMChatRadioManager {
 //		//playerRadioConfig.createSection("radio-settings",playerSettings);
 //		playerRadioConfig.createSection(player.getDisplayName(), playerSetting);
 //		this.saveConfigPlayerRadioSettings();
+		return radioSettings;
 	}
 	
-	public void loadRadioSettings(){
-		
-	}
+
 	
 	
 	

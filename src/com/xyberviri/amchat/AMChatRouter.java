@@ -41,7 +41,7 @@ public class AMChatRouter {
 	public void toLocal(Player sender,String message){
 		Location origin = sender.getLocation();
 		for(Player player : Bukkit.getOnlinePlayers()){
-			if	((player.hasPermission("amchat.local.hearall")||player.isOp())||(amcMain.limitChat() && (amcMain.amcTools.getDistance(origin,player.getLocation()) < amcMain.getMaxChat()))){
+			if	((player.hasPermission("amchat.local.hearall")||player.isOp())||(amcMain.limitChat() && sender.getWorld().equals(player.getWorld()) && (amcMain.amcTools.getDistance(origin,player.getLocation()) < amcMain.getMaxChat()))){
 				player.sendMessage(message);
 			} 
 			else if (!amcMain.limitChat()){

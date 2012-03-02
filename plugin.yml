@@ -2,6 +2,7 @@ name: AMChat
 author: Xyberviri
 main: com.xyberviri.amchat.AMChat
 version: 0.2
+description: Radio based communication
 commands:
    am:
       description: display information about your radio
@@ -43,3 +44,34 @@ commands:
       description: display information about your fixed radio towers
       permission: amchat.radio.fixed.use
       usage: Usage /xm
+      
+permissions:
+  amchat.radio.*:
+    description: Gives access to all am chat commands
+    children:
+      amchat.local.hearall: true
+      amchat.radio.hearall: true
+      amchat.radio.readall: true
+      amchat.radio.override.tune: true
+      amchat.radio.override.code: true
+      amchat.radio.override.cutoff: true
+      amchat.radio.personal.radio: true
+      amchat.radio.personal.mic: true
+      amchat.radio.personal.filter: true
+      amchat.radio.personal.tune: true
+      amchat.radio.personal.code: true
+      amchat.radio.personal.cutoff: true
+      amchat.radio.personal.home: true
+      amchat.radio.personal.ping: true
+  amchat.radio.personal.*:
+    description: Gives access to all radio commands
+    default: true
+    children:
+      amchat.radio.personal.radio: true
+      amchat.radio.personal.mic: true
+      amchat.radio.personal.filter: true
+      amchat.radio.personal.tune: true
+      amchat.radio.personal.code: true
+      amchat.radio.personal.cutoff: true
+      amchat.radio.personal.home: true
+      amchat.radio.personal.ping: true    

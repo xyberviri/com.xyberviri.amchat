@@ -22,8 +22,8 @@ public class AMChatListener implements Listener {
     
     @EventHandler
     public void onPlayerLogin(PlayerLoginEvent event){
-    		//Player player = event.getPlayer();
-    		//this.amcMain.loadPlayerRadioSettings(player);
+    		Player player = event.getPlayer();
+    		this.amcMain.loadPlayerRadioSettings(player);
     }
 
     @EventHandler
