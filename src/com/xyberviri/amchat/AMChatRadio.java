@@ -86,6 +86,7 @@ public class AMChatRadio {
 	//Getter/Setter:Password
 	public String getPass() {return varRadioLinkPass;}
 	public void setPass(String varRadioLinkPass) {this.varRadioLinkPass = varRadioLinkPass;}
+	public boolean chkPass(String varInputPass){return varRadioLinkPass.equals(varInputPass);}
 	
 	//Getter/Setter:Name
 	public String getName() {return varRadioName;}
