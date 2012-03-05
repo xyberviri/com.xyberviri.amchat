@@ -1,7 +1,11 @@
 package com.xyberviri.amchat;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 
 public class AMChatRadio {
@@ -14,10 +18,12 @@ public class AMChatRadio {
 	private int			varRadioCode;		//	What Code are we using to encrypt chat, 0 is disabled.
 	private String 		varRadioLinkPass;	//	What password does some one need to enter so they can join
 
-	private double	varRadioRange;		//	How far do i reach.
-	private int		varRadioAntHt;		//	How Tall is my antenna.
+	//we don't need to save any of these values
+	//private double	varRadioRange;		//	How far do i reach.
+	//private int		varRadioAntHt;		//	How Tall is my antenna.
 	private boolean	varRadioIsValid;	//	Is this radio valid? Can it Transmit?
 	private boolean	varRadioIsAdmin;	//	Is this a admin radio?
+	private int		varRadioABlocks;	//	Antenna blocks
 	private int		varRadioIBlocks;	//	Iron blocks
 	private int		varRadioGBlocks;	//	Gold blocks
 	private int		varRadioDBlocks;	//	Diamond
@@ -25,6 +31,7 @@ public class AMChatRadio {
 	
 	//TODO: Admin Radio
 	//TODO: Player Radio
+	//TODO: Plugin Radio
 	// Server Radios are like player radios but don't Require Range checks
 	// They also don't have a physical tower and the location is set buy the admins
 	// Encryption, Passwords and Range Checks are Disabled.
@@ -32,25 +39,27 @@ public class AMChatRadio {
 	// Admin List returns Server Operator List 
 	// Name Checks are Disabled
 	
-	private ArrayList<String> radioMembers;
-	private ArrayList<String> radioAdmins;
-	private ArrayList<AMChatRadio> radioNetwork; //These are radios that are linked to me
+	private ArrayList<String> radioMembers;			//List of people who are authorized to use me
+	private ArrayList<String> radioAdmins;			//List of Admins for this radio
+	private ArrayList<AMChatRadio> radioNetwork; 	//These are other radios that are linked to me
 	
 	AMChatRadio(AMChatRadioManager amChatRadioManager){
 		this.amcRadMan = amChatRadioManager;
 		this.radioMembers = new ArrayList<String>();
 		this.radioAdmins = new ArrayList<String>();
 		this.radioNetwork = new ArrayList<AMChatRadio>();
-		
-		setVarRadioRange(0.0);		//	How far do i reach.
-		varRadioAntHt=0;		//	How Tall is my antenna.
-		varRadioIsValid=false;	//	Is this radio valid? Can it Transmit?
-		varRadioIsAdmin=false;	//	Is this a admin radio?
-		varRadioIBlocks=0;		//	Iron blocks
-		varRadioGBlocks=0;		//	Gold blocks
-		varRadioDBlocks=0;		//	Diamond
-		varRadioOBlocks=0;		//	Obsidian
+
+		this.varRadioIsValid=false;	//	Is this radio valid? Can it Transmit?
+		this.varRadioIsAdmin=false;	//	Is this a admin radio?
+		this.varRadioABlocks=0;		
+		this.varRadioIBlocks=0;		//	Iron blocks
+		this.varRadioGBlocks=0;		//	Gold blocks
+		this.varRadioDBlocks=0;		//	Diamond
+		this.varRadioOBlocks=0;		//	Obsidian
 		}
+	
+	
+
 	
 //	//This is the handle that another Radio is using to send us a relay message
 //	public void rRelay(AMChatRelayPacket amcRelayPacket){
@@ -62,6 +71,47 @@ public class AMChatRadio {
 //	private void sendRelay(AMChatRelayPacket amcRelayPacket){
 //		
 //	}
+	public void chkValid(){
+		if (varRadioIsAdmin){
+			setValid(true);
+		} else {
+			update();
+		}
+	}
+	
+	private void update(){
+		setValid(false);
+		this.varRadioABlocks=0;		//  Antenna blocks
+		this.varRadioIBlocks=0;		//	Iron blocks
+		this.varRadioGBlocks=0;		//	Gold blocks
+		this.varRadioDBlocks=0;		//	Diamond
+		this.varRadioOBlocks=0;		//	Obsidian
+		
+		int x = varRadioLoc.getBlockX();
+		int z = varRadioLoc.getBlockZ();
+		World world = varRadioLoc.getWorld();
+		
+		for(int y = varRadioLoc.getBlockY(); y > varRadioLoc.getWorld().getMaxHeight();){
+			Material blockType = world.getBlockAt(x, y, z).getType();
+		if(blockType.equals(Material.JUKEBOX)){
+			//TODO:SignSearchRouting();
+			setValid(true);
+			} else if(blockType.equals(Material.IRON_FENCE)){
+				this.varRadioABlocks++;
+				} else if(blockType.equals(Material.IRON_BLOCK)){
+					this.varRadioIBlocks++;
+					} else if(blockType.equals(Material.GOLD_BLOCK)){
+						this.varRadioGBlocks++;
+						} else if(blockType.equals(Material.DIAMOND_BLOCK)){
+							this.varRadioDBlocks++;
+							} else if(blockType.equals(Material.OBSIDIAN)){
+								this.varRadioOBlocks++;
+								} else{
+									break;
+									}
+			y++;
+		}	
+	}
 
 	//Is this a valid Radio tower should we talk to it, does it work.
 	public boolean isValid() {if (varRadioIsAdmin){return true;} else {return varRadioIsValid;}}
@@ -94,11 +144,16 @@ public class AMChatRadio {
 
 	//Getter/Setter:Location
 	public Location getLoc() {return varRadioLoc;}
-	public void setLoc(Location varRadioLoc) {this.varRadioLoc=varRadioLoc;}	
+	public void setLoc(Location varRadioLoc) {
+		this.varRadioLoc=varRadioLoc;
+		}	
 	public void setLoc(World world,Double locX,Double locY,Double locZ) {this.varRadioLoc = new Location(world, locX, locY, locZ);	}		
 	public void setLoc(String world,Double locX,Double locY,Double locZ) {this.varRadioLoc = new Location(this.amcRadMan.amcMain.getServer().getWorld(world), locX, locY, locZ);}
+	public void setLoc(String world,String locX,String locY,String locZ) {
+		this.varRadioLoc = new Location(this.amcRadMan.amcMain.getServer().getWorld(world),Double.valueOf(locX), Double.valueOf(locY), Double.valueOf(locZ));
+		}
 	
-
+	
 	//Get/Set/Add/Del Members
 	public ArrayList<String> getMembers() {return radioMembers;}
 	public void setMembers(ArrayList<String>radioMembers){
@@ -161,13 +216,27 @@ public class AMChatRadio {
 		return false;
 	}
 
-	public double getRange() {
-		return varRadioRange;
+
+
+
+	public Map<String, Object> getSettings() {
+		Map<String, Object> radioSetting = new HashMap<String,Object>();
+		radioSetting.put("radio-id", varRadioName);
+		radioSetting.put("owner", varRadioOwner);
+		radioSetting.put("freq",varRadioChannel);
+		radioSetting.put("code",this.varRadioCode);
+		radioSetting.put("pass",this.varRadioLinkPass);
+		radioSetting.put("locw",this.varRadioLoc.getWorld().getName());
+		radioSetting.put("locx",varRadioLoc.getX());
+		radioSetting.put("locy",varRadioLoc.getY());
+		radioSetting.put("locz",varRadioLoc.getZ());
+		radioSetting.put("admins",this.radioAdmins);
+		radioSetting.put("members",this.radioMembers);
+		radioSetting.put("radio-isadmin",varRadioIsAdmin);
+		return radioSetting;	
 	}
 
-	public void setVarRadioRange(double varRadioRange) {
-		this.varRadioRange = varRadioRange;
-	}	
+
 	
 	
-}
+}//EOF

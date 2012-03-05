@@ -7,7 +7,7 @@ commands:
    am:
       description: display information about your radio
       permission: amchat.radio.personal.use
-      usage: Usage /am
+      usage: type /help am for more information.
    am radio:
       description: toggles your radio on off 
       permission: amchat.radio.personal.radio
@@ -40,16 +40,21 @@ commands:
       description: send your info to another player
       permission: amchat.radio.personal.ping
       usage: Usage /am ping playername
+   am list:
+      description: lists all of the players online with active radios and what they are set to.
+      permission: amchat.radio.list.personal
+      usage: Usage /am list
    xm:
       description: display information about your fixed radio towers
       permission: amchat.radio.fixed.use
       usage: Usage /xm
       
 permissions:
-  amchat.radio.*:
+  amchat.*:
     description: Gives access to all am chat commands
     children:
       amchat.local.hearall: true
+      amchat.radio.list.personal: true
       amchat.radio.hearall: true
       amchat.radio.readall: true
       amchat.radio.override.tune: true
@@ -74,4 +79,10 @@ permissions:
       amchat.radio.personal.code: true
       amchat.radio.personal.cutoff: true
       amchat.radio.personal.home: true
-      amchat.radio.personal.ping: true    
+      amchat.radio.personal.ping: true
+  amchat.radio.override.*:
+    description: Gives access to all override commands
+    children:
+      amchat.radio.override.tune: true
+      amchat.radio.override.code: true
+      amchat.radio.override.cutoff: true

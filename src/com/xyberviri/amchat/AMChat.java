@@ -53,6 +53,8 @@ public class AMChat extends JavaPlugin {
 	int varRadioMinCode = 0;			// this is the minimum valid code key, 0 = disabled; This really shouldn't be changed.
 	int varRadioMaxCode = 999;			// max value encryption key we will use for transmission.
 	
+	
+	
 	ArrayList<String>    playerRadioOn = new ArrayList<String>();				// List of players with Radios On
 	Map<Player, Integer> playerRadioChannel = new HashMap<Player, Integer>(); 	// player radio channel
 	Map<Player, Integer> playerRadioCode = new HashMap<Player, Integer>(); 		// Player radio encoding key
@@ -135,7 +137,8 @@ public class AMChat extends JavaPlugin {
 	public void onDisable() {
 		saveSettings();
 		saveConfigPlayerRadioSettings();
-		amcLogger.info(" disabled.");
+		amcRadMan.saveRadioSettings();
+		logMessage("Disabled.");
 	}
 
 	@Override
@@ -222,7 +225,7 @@ public class AMChat extends JavaPlugin {
 			setPlayerRadioCutoff(player, varRadioMaxCuttoff);
 		}
 		
-		if (playerHasSettings && playerSetting.containsKey("link")){
+		if (playerHasSettings && playerSetting.containsKey("link") && amcRadMan.isLinkValid((String) playerSetting.get("link"))){
 			setPlayerLinkID(player, (String) playerSetting.get("link"));
 		} else {
 			setPlayerLinkID(player, "none");
@@ -249,6 +252,7 @@ public class AMChat extends JavaPlugin {
 	saveConfigPlayerRadioSettings();
 	}
 	
+	//Get Players Radio link id, if the key is missing set it to none
 	public String getPlayerLinkID(Player player) {
 		if (!playerRadioLinkID.containsKey(player)){
 			setPlayerLinkID(player,"none");
@@ -256,6 +260,7 @@ public class AMChat extends JavaPlugin {
 		return playerRadioLinkID.get(player);
 	}
 	
+	//Set Players Radio link id, if the give id is blank its set to none
 	public void setPlayerLinkID(Player player,String linkID){
 		if(linkID.isEmpty()){
 			linkID="none";
@@ -433,8 +438,7 @@ public class AMChat extends JavaPlugin {
 
 	//Instead of slamming the main object with compares we do all that stuff here
 	public boolean canReceive(Player sender, Player player) {
-		if (sender.equals(player)){
-			//seriously, nah just kidding yeah the player can hear them self. 
+		if (sender.equals(player)){ 
 			return true;}		
 			//If the player receiving the message is a op or has the below permission they can hear everything.
 		if (player.hasPermission("amchat.radio.hearall")||player.isOp()){return true;}
@@ -453,8 +457,9 @@ public class AMChat extends JavaPlugin {
 			//Radio channel is above the cutoff limit
 			return false;
 		}
+		//TODO:Change this comparison, This might cause issues on certain channel/code combinations
 		if((playerRadioChannel.get(sender)!=playerRadioChannel.get(player))&&(playerRadioCode.get(sender)!=playerRadioCode.get(player))&&(playerRadioFilter.get(player))){
-			//message is encrypted and we don't want to hear that shit.
+			//message is encrypted and we don't want to hear that.
 			return false;
 			}
 		if(varLimitRadioChat){
@@ -492,7 +497,6 @@ public class AMChat extends JavaPlugin {
 
 	public void playerRadioPing(Player sender, Player player) {
 		//This works pretty simple, we use the message format to show our information
-		//TODO:Add Range Check
 		String senderInfo = "Frequency:"+ getPlayerRadioChannel(player) + this.varRadioFreqSuffix + " Code:"+getPlayerRadioCode(player);
 		String pingMessage = "*PING*"+amcTools.createMessage(player, ChatColor.YELLOW +senderInfo+"*PING*");
 		amcTools.msgToPlayer(player, pingMessage);

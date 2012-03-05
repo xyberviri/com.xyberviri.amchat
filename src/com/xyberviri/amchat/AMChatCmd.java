@@ -57,6 +57,26 @@ public class AMChatCmd implements CommandExecutor {
 			return true;
 		}
 		
+		//am list
+		if ((player.hasPermission("amchat.radio.list")||player.isOp()) && args[0].equalsIgnoreCase("list")){
+			if (amcMain.getRadioPlayers().isEmpty()){
+				amcMain.amcTools.msgToPlayer(player,"There are no players online with active radios");
+				} 
+			else {
+				amcMain.amcTools.msgToPlayer(player,"There are "+amcMain.getRadioPlayers().size()+" players online with active radio");
+				for (String playerName : amcMain.getRadioPlayers()){
+					Player activeRadios = Bukkit.getServer().getPlayer(playerName);
+			    	if (activeRadios != null){
+			    		amcMain.amcTools.msgToPlayer(player,"["+playerName+"] fq:"+amcMain.getPlayerRadioChannel(activeRadios)+", cd:"+amcMain.getPlayerRadioCode(activeRadios)+", mic open:"+amcMain.getPlayerMic(activeRadios)+", filter on:"+amcMain.getPlayerFilter(activeRadios)+", cutoff:"+amcMain.getPlayerCutoff(activeRadios));
+			    	}	
+				}
+				
+			}
+			return true;
+		}		
+		
+		
+		
 		//am radio
 		if(player.hasPermission("amchat.radio.personal.radio") && args[0].equalsIgnoreCase("radio") && args.length == 1){
 			amcMain.togglePlayerRadio(player);
@@ -101,7 +121,7 @@ public class AMChatCmd implements CommandExecutor {
 				{targetValue=0;}
 				
 				if ((targetValue>amcMain.varRadioMaxCode)&&(!player.hasPermission("amchat.radio.override.code"))){
-					amcMain.amcTools.errorToPlayer(player,"Valid Code is 0-"+amcMain.varRadioMaxCode);
+					amcMain.amcTools.errorToPlayer(player,"Valid Code range is "+amcMain.varRadioMinCode+"-"+amcMain.varRadioMaxCode);
 					return true;					
 				}
 				
@@ -122,7 +142,7 @@ public class AMChatCmd implements CommandExecutor {
 					amcMain.amcTools.errorToPlayer(player,"Valid Cutoff is 0-"+amcMain.varRadioMaxCuttoff);
 					return true;
 				} else if (targetValue<0){
-					amcMain.amcTools.errorToPlayer(player,"Valid Cutoff is 0-"+amcMain.varRadioMaxCuttoff);
+					amcMain.amcTools.errorToPlayer(player,"Valid Cutoff is 0-"+amcMain.varRadioMaxCuttoff+", setting to 0.");
 					targetValue=0;
 					}
 				amcMain.setPlayerRadioCutoff(player, targetValue);

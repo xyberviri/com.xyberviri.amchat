@@ -1,7 +1,10 @@
 package com.xyberviri.amchat;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -13,6 +16,14 @@ public class AMChatListener implements Listener {
 	public AMChatListener (AMChat amchat){
 		this.amcMain = amchat;
 	}
+	
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event) {
+        Block block = event.getBlock();
+        if (block.getType() == Material.JUKEBOX){        	
+        	amcMain.amcRadMan.createNewRadio(event.getPlayer(), block.getLocation());     	
+        }        		
+    }    		
 	
     @EventHandler
     public void onPlayerChat(PlayerChatEvent event) {
@@ -36,4 +47,5 @@ public class AMChatListener implements Listener {
 		if (this.amcMain.equals(amcMainPlugin)){return true;}
 		return false;
 	}
+	
 }
