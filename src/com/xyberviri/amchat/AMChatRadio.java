@@ -80,37 +80,41 @@ public class AMChatRadio {
 	}
 	
 	private void update(){
-		setValid(false);
+		//Reset block counts
 		this.varRadioABlocks=0;		//  Antenna blocks
 		this.varRadioIBlocks=0;		//	Iron blocks
 		this.varRadioGBlocks=0;		//	Gold blocks
 		this.varRadioDBlocks=0;		//	Diamond
 		this.varRadioOBlocks=0;		//	Obsidian
-		
-		int x = varRadioLoc.getBlockX();
-		int z = varRadioLoc.getBlockZ();
-		World world = varRadioLoc.getWorld();
-		
-		for(int y = varRadioLoc.getBlockY(); y > varRadioLoc.getWorld().getMaxHeight();){
-			Material blockType = world.getBlockAt(x, y, z).getType();
-		if(blockType.equals(Material.JUKEBOX)){
-			//TODO:SignSearchRouting();
-			setValid(true);
-			} else if(blockType.equals(Material.IRON_FENCE)){
-				this.varRadioABlocks++;
-				} else if(blockType.equals(Material.IRON_BLOCK)){
-					this.varRadioIBlocks++;
-					} else if(blockType.equals(Material.GOLD_BLOCK)){
-						this.varRadioGBlocks++;
-						} else if(blockType.equals(Material.DIAMOND_BLOCK)){
-							this.varRadioDBlocks++;
-							} else if(blockType.equals(Material.OBSIDIAN)){
-								this.varRadioOBlocks++;
-								} else{
-									break;
-									}
-			y++;
-		}	
+		if(varRadioLoc.getBlock().getType().equals(Material.JUKEBOX)){
+			
+			setValid(true);			
+			int x = varRadioLoc.getBlockX();
+			int y = varRadioLoc.getBlockY()+1;
+			int z = varRadioLoc.getBlockZ();
+			World world = varRadioLoc.getWorld();
+			
+			for(;y > varRadioLoc.getWorld().getMaxHeight();){
+				Material blockType = world.getBlockAt(x, y, z).getType();
+				if(blockType.equals(Material.IRON_FENCE)){
+					this.varRadioABlocks++;
+					} else if(blockType.equals(Material.IRON_BLOCK)){
+						this.varRadioIBlocks++;
+						} else if(blockType.equals(Material.GOLD_BLOCK)){
+							this.varRadioGBlocks++;
+							} else if(blockType.equals(Material.DIAMOND_BLOCK)){
+								this.varRadioDBlocks++;
+								} else if(blockType.equals(Material.OBSIDIAN)){
+									this.varRadioOBlocks++;
+									} else{
+										break;
+										}
+				y++;
+			}//for end	
+		} else {
+			//We didn't find a radio block at the location were not valid.
+			setValid(false);
+		}
 	}
 
 	//Is this a valid Radio tower should we talk to it, does it work.
