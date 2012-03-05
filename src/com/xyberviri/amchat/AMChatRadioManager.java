@@ -140,6 +140,7 @@ public class AMChatRadioManager {
 			//If ever thing was loaded correctly then we add it to the list of radios
 			//Also note by not putting it in this list it wont be saved. 
 			if(b){
+				newRadio.chkValid();
 			this.amRadioList.add(newRadio);
 			this.amRadioHandles.put((String) radioSettings.get("radio-id"), newRadio);
 			}
