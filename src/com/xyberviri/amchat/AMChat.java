@@ -42,7 +42,7 @@ public class AMChat extends JavaPlugin {
 	boolean varLimitPlayerChat = true;	// Should we limit the distance that non radio chat can reach?
 	boolean varLimitRadioChat = false;	// Should we limit the distance that a personal communicator can reach?
 	
-	double varRadioSkyWaveMod = 2;			// This distance to modify the chat distance for radios at night.
+	double varRadioSkyWaveMod = 2;		// This distance to modify the chat distance for radios at night.
 	boolean varSkyWaveEnabled = false;	// Is SkyWave Effect enabled?
 	
 	boolean varRadioAutoOn = true;		// if we should automatically turn a players radio on
@@ -52,6 +52,9 @@ public class AMChat extends JavaPlugin {
 	int varRadioMaxCuttoff = 15;
 	int varRadioMinCode = 0;			// this is the minimum valid code key, 0 = disabled; This really shouldn't be changed.
 	int varRadioMaxCode = 999;			// max value encryption key we will use for transmission.
+	
+	int varHeldItemID = 345;			// the held item that is our radio
+	boolean varHeldItemReq = false;		// is the held item needed so we can use our radio.
 	
 	
 	
@@ -112,7 +115,8 @@ public class AMChat extends JavaPlugin {
 		this.varRadioMaxCode = amcConfig.getInt("radio-code-max", varRadioMaxCode);
 		this.varRadioDefFreq = amcConfig.getInt("radio-default-channel", varRadioDefFreq);
 		this.varRadioAutoOn = amcConfig.getBoolean("radio-auto-on", varRadioAutoOn);
-		
+		this.varHeldItemID = amcConfig.getInt("radio-item-id",varHeldItemID);
+		this.varHeldItemReq = amcConfig.getBoolean("radio-item-required", varHeldItemReq);
 	}
 	
 	public void saveSettings(){
@@ -130,6 +134,8 @@ public class AMChat extends JavaPlugin {
 		amcConfig.set("radio-code-max", varRadioMaxCode);
 		amcConfig.set("radio-default-channel", varRadioDefFreq);
 		amcConfig.set("radio-auto-on", varRadioAutoOn);	
+		amcConfig.set("radio-item-id",varHeldItemID);
+		amcConfig.set("radio-item-required", varHeldItemReq);
 		this.saveConfig();
 	}
 	
@@ -152,14 +158,17 @@ public class AMChat extends JavaPlugin {
 		this.amcCmd = new AMChatCmd(this);
 		this.amcListener = new AMChatListener(this);
 		this.amcRadMan = new AMChatRadioManager(this);
+		loadSettings();
+		saveSettings();
+		
 
 		this.getServer().getPluginManager().registerEvents(amcListener, this);
 		
 		this.getCommand("am").setExecutor(amcCmd);
 		this.getCommand("xm").setExecutor(amcCmd);
 		
-		loadSettings();	
-		saveSettings();
+	
+		
 		logMessage("Enabled");
 	}
 	
