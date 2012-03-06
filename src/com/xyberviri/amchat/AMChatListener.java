@@ -10,7 +10,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class AMChatListener implements Listener {
-	//this is a listener server, all of the listener
+	//this is a listener server, all of the listeners
 	AMChat amcMain;
 	
 	public AMChatListener (AMChat amchat){
@@ -20,7 +20,7 @@ public class AMChatListener implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         Block block = event.getBlock();
-        if (block.getType() == Material.JUKEBOX){        	
+        if (block.getType() == Material.JUKEBOX && (!event.getPlayer().isSneaking()) && event.getPlayer().hasPermission("amchat.radio.fixed.create")){        	
         	amcMain.amcRadMan.createNewRadio(event.getPlayer(), block.getLocation());     	
         }        		
     }    		
