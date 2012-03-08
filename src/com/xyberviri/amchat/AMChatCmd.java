@@ -1,5 +1,7 @@
 package com.xyberviri.amchat;
 
+import java.util.ArrayList;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -36,11 +38,36 @@ public class AMChatCmd implements CommandExecutor {
 					}
 				return true;
 			}
+			
+			if (cmd.getName().equalsIgnoreCase("xm") && args[0].equalsIgnoreCase("list")){
+				if(amcMain.amcRadMan.getRadioList().isEmpty()){
+					amcMain.logMessage("There are no radios");
+					return true;
+				} else{
+					amcMain.logMessage("There are "+amcMain.amcRadMan.getRadioList().size()+" radio(s) on the server.");
+					for(AMChatRadio amcRadSet : amcMain.amcRadMan.getRadioList()){
+						amcMain.logMessage("["+amcRadSet.getName()+"]f:"+amcRadSet.getChan()+" c:"+amcRadSet.getCode()+" loc:"+amcRadSet.getLoc().getWorld().getName()+" "+amcRadSet.getLoc().getBlockX()+", "+amcRadSet.getLoc().getBlockY()+", "+amcRadSet.getLoc().getBlockZ());
+					}
+					return true;
+				}
+				
+			}
+			
+			if (cmd.getName().equalsIgnoreCase("xm") && args[0].equalsIgnoreCase("check")){
+				amcMain.amcRadMan.amcRadManComCheck();
+				return true;			
+			}
+			
 			amcMain.logMessage("That is not avalible from the console");
 			return true;
 		}	
 		
 		Player player = (Player) sender;
+		
+		if(amcMain.varHeldItemReq && player.getItemInHand().getTypeId() != amcMain.varHeldItemID){
+			amcMain.amcTools.msgToPlayer(player,"Sorry, you need to be holding a radio before you can change the settings.");
+			return true;
+		}
 
 		//AM command branch
 		if (cmd.getName().equalsIgnoreCase("am")){
@@ -51,14 +78,14 @@ public class AMChatCmd implements CommandExecutor {
 			amcMain.amcTools.msgToPlayer(player,"[-Xmit-Freq-]:"," "+amcMain.getPlayerRadioChannel(player));
 			amcMain.amcTools.msgToPlayer(player,"[-Xmit-Code-]:"," "+amcMain.getPlayerRadioCode(player));
 			amcMain.amcTools.msgToPlayer(player,"[-Xmit-Link-]:"," "+amcMain.getPlayerLinkID(player));
-			amcMain.amcTools.msgToPlayer(player,"[--Cut-Off--]:"," "+amcMain.getPlayerCutoff(player));
-			amcMain.amcTools.msgToPlayer(player,"[--Mic-Open-]:"," "+amcMain.getPlayerMic(player));
-			amcMain.amcTools.msgToPlayer(player,"[--Filter---]:"," "+amcMain.getPlayerFilter(player));
+			amcMain.amcTools.msgToPlayer(player,"[-Mic-Open--]:"," "+amcMain.getPlayerMic(player));
+			amcMain.amcTools.msgToPlayer(player,"[-Cut-Off---]:"," "+amcMain.getPlayerCutoff(player));			
+			amcMain.amcTools.msgToPlayer(player,"[-Filter----]:"," "+amcMain.getPlayerFilter(player));
 			return true;
 		}
 		
 		//am list
-		if ((player.hasPermission("amchat.radio.list")||player.isOp()) && args[0].equalsIgnoreCase("list")){
+		if ((player.hasPermission("amchat.radio.list.personal")||player.isOp()) && args[0].equalsIgnoreCase("list")){
 			if (amcMain.getRadioPlayers().isEmpty()){
 				amcMain.amcTools.msgToPlayer(player,"There are no players online with active radios");
 				} 
@@ -97,6 +124,10 @@ public class AMChatCmd implements CommandExecutor {
 		
 		//am tune <#>
 		if(player.hasPermission("amchat.radio.personal.tune") && args[0].equalsIgnoreCase("tune") && args.length == 2){
+			if(amcMain.isPlayerLinked(player)){
+				amcMain.amcTools.errorToPlayer(player,"You are currently linked to "+amcMain.getPlayerLinkID(player)+" you need to /xm unlink before you can tune");
+				return true;
+			}
 			try{ 
 				Integer targetValue = Integer.parseInt(args[1]);
 				
@@ -114,13 +145,15 @@ public class AMChatCmd implements CommandExecutor {
 		
 		//am code <#>
 		if(player.hasPermission("amchat.radio.personal.code") && args[0].equalsIgnoreCase("code") && args.length == 2){
+			if(amcMain.isPlayerLinked(player)){
+				amcMain.amcTools.errorToPlayer(player,"You are currently linked to "+amcMain.getPlayerLinkID(player)+" you need to /xm unlink first to change your code");
+				return true;
+			}
 			try{ 
 				Integer targetValue = Integer.parseInt(args[1]);
 				
-				if ((targetValue<0)&&(!player.hasPermission("amchat.radio.override.code")))
-				{targetValue=0;}
 				
-				if ((targetValue>amcMain.varRadioMaxCode)&&(!player.hasPermission("amchat.radio.override.code"))){
+				if ((targetValue<amcMain.varRadioMinCode || targetValue>amcMain.varRadioMaxCode)&&(!player.hasPermission("amchat.radio.override.code"))&&(!player.isOp())){
 					amcMain.amcTools.errorToPlayer(player,"Valid Code range is "+amcMain.varRadioMinCode+"-"+amcMain.varRadioMaxCode);
 					return true;					
 				}
@@ -164,6 +197,9 @@ public class AMChatCmd implements CommandExecutor {
 			if(amcMain.getPlayerFilter(player)){
 				amcMain.togglePlayerFilter(player);
 			}			
+			if(amcMain.isPlayerLinked(player)){
+				amcMain.setPlayerLinkID(player, "none");
+			}
 			amcMain.tunePlayerRadioChannel(player, amcMain.varRadioDefFreq);
 			amcMain.setPlayerRadioCode(player, 0);
 			amcMain.setPlayerRadioCutoff(player, amcMain.varRadioMaxCuttoff);
@@ -186,6 +222,213 @@ public class AMChatCmd implements CommandExecutor {
 		//Else if  were using XM commands 
 		else if (cmd.getName().equalsIgnoreCase("xm")){
 			
+			//XM
+			if ((player.hasPermission("amchat.radio.fixed.use")||player.isOp()) && args.length == 0){
+				ArrayList<String> varRadios = amcMain.amcRadMan.getOwnerRadios(player.getDisplayName());
+				if(varRadios.isEmpty()){
+					amcMain.amcTools.msgToPlayer(player,"You dont currently own any radios.");
+				} else {
+					amcMain.amcTools.msgToPlayer(player,"Radio's Owned:",""+varRadios.size());
+					String varHandleList="";
+					for(String varHandle : varRadios){
+						varHandleList="["+varHandle+"] "+varHandleList;
+					}
+					amcMain.amcTools.msgToPlayer(player,">",varHandleList);
+				}				
+				return true;
+			}
+			
+			
+			if ((player.hasPermission("amchat.radio.list.fixed")||player.isOp()) && args[0].equalsIgnoreCase("list")){
+				if (amcMain.amcRadMan.getRadioList().isEmpty()){
+					amcMain.amcTools.msgToPlayer(player,"The radio manager isn't tracking any radio's");
+					} 
+				else {
+					amcMain.amcTools.msgToPlayer(player,"There are "+amcMain.amcRadMan.getRadioList().size()+" being tracked by RadMan.");
+					for (AMChatRadio singleRadio : amcMain.amcRadMan.getRadioList()){
+						amcMain.amcTools.msgToPlayer(player,"["+singleRadio.getName()+"] fq:"+singleRadio.getChan()
+								+", cd:"+singleRadio.getCode()+", pass:"+singleRadio.getPass()
+								+", users:"+singleRadio.getCurUsers()+"/"+singleRadio.getMaxUsers()
+								+", range:"+singleRadio.getMaxDistance());
+					}
+				}
+				return true;
+			}	
+			
+			//XM link
+			if((player.hasPermission("amchat.radio.fixed.link")||player.isOp()) && args[0].equalsIgnoreCase("link")){
+				
+				//XM link
+				if(args.length==1){
+					if(amcMain.isPlayerLinked(player)){
+						AMChatRadio linkedRadio = amcMain.amcRadMan.getRadio(amcMain.getPlayerLinkID(player));
+						amcMain.amcTools.msgToPlayer(player, "["+linkedRadio.getChan()+"."+linkedRadio.getCode()+"]Radio: ","["+linkedRadio.getName()+"]");
+						amcMain.amcTools.msgToPlayer(player, "["+linkedRadio.getChan()+"."+linkedRadio.getCode()+"]Users: ",linkedRadio.getCurUsers()+"/"+linkedRadio.getMaxUsers());
+						amcMain.amcTools.msgToPlayer(player, "["+linkedRadio.getChan()+"."+linkedRadio.getCode()+"]Password: ",linkedRadio.getPass());
+						amcMain.amcTools.msgToPlayer(player, "["+linkedRadio.getChan()+"."+linkedRadio.getCode()+"]Location: ",linkedRadio.getLocationString());			
+					} else {
+						amcMain.amcTools.msgToPlayer(player, "You are not linked to a transmitter, usage:", "/xm link <id> <password>");	
+						
+					}
+				}
+				//if this has more than 1 arg were trying to do something, check if the 2nd ARG is a valid link
+				else if(!amcMain.amcRadMan.isLinkValid(args[1])){
+					amcMain.amcTools.msgToPlayer(player, "That link id:"+args[1]+" is invalid.");
+					return false;
+				}
+				
+				//XM link <radio-id>|none
+				else if(args.length==2){
+					if(args[1].equalsIgnoreCase("none")){
+						amcMain.setPlayerLinkID(player, "none");
+					} else {
+						if(amcMain.amcRadMan.playerNeedsPass(player, args[1])){
+							amcMain.amcTools.msgToPlayer(player, "This link requires a password to join.");
+							return false;
+						} else {					
+							
+							amcMain.amcRadMan.linkPlayerToRadio(player, args[1]);
+						}		
+					}
+				}
+				//XM link <radio-id> <password>
+				else if(args.length==3){
+					if(amcMain.amcRadMan.playerNeedsPass(player, args[1])){
+						if(amcMain.amcRadMan.isPassValid(args[1], args[2])){
+							amcMain.amcRadMan.linkPlayerToRadio(player, args[1]);	
+						}else {
+							amcMain.amcTools.msgToPlayer(player, "That password is invalid.");	
+						}
+					} else {
+						amcMain.amcRadMan.linkPlayerToRadio(player, args[1]);
+					}					
+				}				
+				
+				return true;									
+			}			
+			//XM unlink
+			if((player.hasPermission("amchat.radio.fixed.link")||player.isOp()) && args[0].equalsIgnoreCase("unlink") && args.length == 1){
+				amcMain.amcRadMan.unlinkPlayerFromRadio(player, amcMain.getPlayerLinkID(player));
+				return true;
+			}
+			//XM chown radioid <online player name>
+			//XM chown radioid <offline player name> <offline player name> 
+			if(player.hasPermission("amchat.radio.fixed.chown") && args[0].equalsIgnoreCase("chown")){
+				if(args.length == 3){
+					if(amcMain.amcRadMan.isLinkValid(args[1])){
+						Player other = Bukkit.getServer().getPlayer(args[2]);
+						if (other == null) {
+							amcMain.amcTools.errorToPlayer(player, args[2] + " is not online! use /xm chown <name> <name> for offline transfers!");
+							return true;
+						}
+						
+						amcMain.amcRadMan.delOwnerRadio(player.getDisplayName(), args[1]);
+						amcMain.amcRadMan.addOwnerRadio(args[2], args[1]);
+						
+						amcMain.amcRadMan.getRadio(args[1]).setOwner(other.getDisplayName());
+						amcMain.amcTools.msgToPlayer(player, "you have changed the owner of "+args[1]+" to ", other.getDisplayName());
+						amcMain.amcTools.msgToPlayer(other, "you have been given ownership of "+args[1]+" by ", other.getDisplayName());
+					}else{
+						amcMain.amcTools.msgToPlayer(player, "the supplied link id was invalid; value:"+args[1]);
+					}
+				}else if(args.length == 4){
+					if (args[2].equals(args[3])){
+						
+						String oldOwner = amcMain.amcRadMan.getRadio(args[1]).getOwner();
+						amcMain.amcRadMan.delOwnerRadio(oldOwner, args[1]);
+						amcMain.amcRadMan.addOwnerRadio(args[2], args[1]);
+						
+						amcMain.amcRadMan.getRadio(args[1]).setOwner(args[2]);
+						amcMain.amcTools.msgToPlayer(player, "you have changed the owner of "+args[1]+" to ", args[2]);						
+					} else {
+						amcMain.amcTools.errorToPlayer(player, "usage /xm chown <name> <name> "+args[2]+" did not match "+args[3]);
+						return true;
+					}
+					
+				} 
+				return true;
+			}			
+			
+			//XM set <pass|p|code|c|freq|f|admin|a>
+			if((player.hasPermission("amchat.radio.fixed.set")||player.isOp()) && args[0].equalsIgnoreCase("set")){
+				if(amcMain.isPlayerLinked(player)){
+					String linkID = amcMain.getPlayerLinkID(player);
+					if(args.length==1){
+						amcMain.amcTools.msgToPlayer(player, "you didn't specify anything to set, valid options are, pass, freq, code, admin, p, f, c & a");
+						return true;
+					}
+					
+					if(player.hasPermission("amchat.radio.override.set") || player.isOp() || amcMain.amcRadMan.isPlayerRadioAdmin(player, amcMain.getPlayerLinkID(player))){
+						if(args.length==2){
+							if(args[1].equalsIgnoreCase("p")||args[1].equalsIgnoreCase("pass")){
+								amcMain.amcRadMan.getRadio(linkID).setPass("");
+								amcMain.amcTools.msgToPlayer(player, "password for ["+linkID+"] set to ", "none");
+							}
+							else{
+								amcMain.amcTools.msgToPlayer(player, "you didn't set a value for "+args[1]);
+							}
+						}
+						else {
+							//Set
+							if(args[1].equalsIgnoreCase("p")||args[1].equalsIgnoreCase("pass")){
+								amcMain.amcTools.msgToPlayer(player, "password for ["+linkID+"] set to ", args[2]);
+								amcMain.amcRadMan.getRadio(linkID).setPass(args[2]);
+							}
+							if(args[1].equalsIgnoreCase("f")||args[1].equalsIgnoreCase("freq")){
+								try{ 
+									Integer targetValue = Integer.parseInt(args[2]);
+									if((targetValue<amcMain.varRadioMinFreq || targetValue>amcMain.varRadioMaxFreq)&&(!player.hasPermission("amchat.radio.override.tune"))&&(!player.isOp())){
+										amcMain.amcTools.errorToPlayer(player,"Valid Frequencies are "+amcMain.varRadioMinFreq+"-"+amcMain.varRadioMaxFreq);
+										return true;
+									}
+									amcMain.amcRadMan.getRadio(linkID).setChan(targetValue);
+								} catch (NumberFormatException e){
+									amcMain.amcTools.errorToPlayer(player,args[2] + "is not a number!");
+									return true;
+									}
+							}
+							if(args[1].equalsIgnoreCase("c")||args[1].equalsIgnoreCase("code")){
+								try{ 
+									Integer targetValue = Integer.parseInt(args[2]);
+
+									if ((targetValue<amcMain.varRadioMinCode || targetValue>amcMain.varRadioMaxCode)&&(!player.hasPermission("amchat.radio.override.code"))&&(!player.isOp())){
+										amcMain.amcTools.errorToPlayer(player,"Valid Code range is "+amcMain.varRadioMinCode+"-"+amcMain.varRadioMaxCode);
+										return true;					
+									}
+									amcMain.amcRadMan.getRadio(linkID).setCode(targetValue);
+								} catch (NumberFormatException e){
+									amcMain.amcTools.errorToPlayer(player,args[2] + "is not a number!");
+									return true;
+									}								
+								
+							}
+							if(args[1].equalsIgnoreCase("a")||args[1].equalsIgnoreCase("admin")){
+								if(player.getName().equalsIgnoreCase(args[2])&&(!player.isOp())){
+									amcMain.amcTools.msgToPlayer(player, "you can not admin yourself.");
+								} else {
+									if(amcMain.amcRadMan.getRadio(linkID).isPlayerAdmin(args[2])){
+										amcMain.amcRadMan.getRadio(linkID).delAdmin(args[2]);
+										amcMain.amcTools.msgToPlayer(player, args[2]+" has been removed from the admin list for "+linkID);	
+										
+									} else {
+										amcMain.amcRadMan.getRadio(linkID).addAdmin(args[2]);
+										amcMain.amcTools.msgToPlayer(player, args[2]+" has been added to the admin list for "+linkID);
+									}									
+								}
+							}
+								
+						}
+						
+					} else {
+						amcMain.amcTools.msgToPlayer(player, "you do not have admin rights over this radio.");
+					}
+				} else {
+					amcMain.amcTools.msgToPlayer(player, "you need to be linked before you can change any settings");
+				}
+				return true;
+			}
+			
+			
 			
 			
 			return false;
@@ -194,7 +437,7 @@ public class AMChatCmd implements CommandExecutor {
 		
 		
 		
-		
+		//We shouldn't ever get here
 		return false;
 	}
 

@@ -3,6 +3,7 @@ package com.xyberviri.amchat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,11 +21,7 @@ public class AMChatRadioManager {
 	
 	private ArrayList<AMChatRadio> 		amRadioList;		//AMChat Radio's
 	private Map <String, AMChatRadio> 	amRadioHandles;		//Handles to Radios
-	private Map <Player, Boolean> 		amIsBuilding;		//Is the player building a radio?
-		
-	
-	//private Map <Player, Integer> 		amRadioStep;		//What step is the player at in construction of a tower. 
-	//this.amRadioStep = new HashMap<Player,Integer>();
+	private	Map <String, ArrayList<String>>  ownerTowers = new HashMap<String,ArrayList<String>>();
 	private XYCustomConfig radioConfig;
 	
 	
@@ -33,17 +30,22 @@ public class AMChatRadioManager {
 		this.amcMain = amchat;
 		this.amRadioList = new ArrayList<AMChatRadio>();
 		this.amRadioHandles = new HashMap<String, AMChatRadio>();
-		this.amIsBuilding = new HashMap<Player,Boolean>();
 		this.radioConfig = new XYCustomConfig(amcMain,"rm.settings.yml");
 		loadRadioSettings();
-			
-
 	}
 	
 	public void amcRadManComCheck(){
 		if (!amRadioList.isEmpty()){
+			List<AMChatRadio> badRadios= new ArrayList<AMChatRadio>();
 			for(AMChatRadio amcRadio: amRadioList){
-				amcRadio.chkValid();
+				if(!amcRadio.chkValid()){
+					badRadios.add(amcRadio);
+				}
+			}
+			if(!badRadios.isEmpty()){
+				for(AMChatRadio amcRadio: badRadios){
+					deleteRadio(amcRadio);
+				}
 			}
 		}
 	}
@@ -95,7 +97,8 @@ public class AMChatRadioManager {
 		}
 	}
 	
-	//This creates a radio from a Object Map	
+	//This creates a radio from a Object Map
+	//The Suppression warring is for the conversions of the arrays.
 	@SuppressWarnings("unchecked")
 	private boolean createRadio(Map<String,Object> radioSettings){
 		boolean b=true;
@@ -103,7 +106,8 @@ public class AMChatRadioManager {
 			AMChatRadio newRadio = new AMChatRadio(this);
 			newRadio.setName((String) radioSettings.get("radio-id"));
 			if(radioSettings.containsKey("owner")){
-				newRadio.setOwner((String) radioSettings.get("owner"));}
+				newRadio.setOwner((String) radioSettings.get("owner"));	
+			}
 			if(radioSettings.containsKey("freq")){
 				newRadio.setChan((Integer) radioSettings.get("freq"));}
 			if(radioSettings.containsKey("code")){
@@ -140,9 +144,10 @@ public class AMChatRadioManager {
 			//If ever thing was loaded correctly then we add it to the list of radios
 			//Also note by not putting it in this list it wont be saved. 
 			if(b){
-				newRadio.chkValid();
+				//newRadio.chkValid();
 			this.amRadioList.add(newRadio);
 			this.amRadioHandles.put((String) radioSettings.get("radio-id"), newRadio);
+			addOwnerRadio((String) radioSettings.get("owner"),(String) radioSettings.get("radio-id"));
 			}
 		} 
 		else{b=false;}
@@ -156,30 +161,41 @@ public class AMChatRadioManager {
 	public void createNewRadio(Player player,Location radioLocation){
 		AMChatRadio newRadio = new AMChatRadio(this);
 		String varNewRadioHandle = genRadioID(false);
+		String varNewPass="";
 		newRadio.setName(varNewRadioHandle);
 		newRadio.setOwner(player.getDisplayName());
 		newRadio.setLoc(radioLocation);
 		newRadio.setChan(amcMain.getPlayerRadioChannel(player));
-		newRadio.setCode(amcMain.getPlayerRadioCode(player));
-		newRadio.setPass(""+varNewRadioHandle.hashCode());		
+		newRadio.setCode(amcMain.getPlayerRadioCode(player));		
 		newRadio.addMember(player.getDisplayName());
 		newRadio.addAdmin(player.getDisplayName());
-		amRadioList.add(newRadio);
-		amRadioHandles.put(varNewRadioHandle, newRadio);
+		newRadio.linkPlayer(player);
+		varNewPass=""+varNewRadioHandle.hashCode();
+		newRadio.setPass(varNewPass);
+		this.amRadioList.add(newRadio);
+		this.amRadioHandles.put(varNewRadioHandle, newRadio);
+		
+		
 		amcMain.setPlayerLinkID(player, varNewRadioHandle);
-		amcMain.amcTools.msgToPlayer(player, " created a new radio with id:",varNewRadioHandle);
-		amcMain.logMessage(player.getDisplayName()+" created a new radio with id:"+varNewRadioHandle);
+		addOwnerRadio(player.getDisplayName(),varNewRadioHandle);
+		player.setCompassTarget(radioLocation);
+		
+		
+		amcMain.amcTools.msgToPlayer(player, "You have created a new Radio.");
+		amcMain.amcTools.msgToPlayer(player, "MCC-ID: ",varNewRadioHandle);
+		amcMain.amcTools.msgToPlayer(player, "PASSWD: ",varNewPass);
+		amcMain.logMessage(player.getDisplayName()+" created a new radio");
+		amcMain.logMessage("id:"+varNewRadioHandle+" default passwd:"+varNewPass);
 	}
 	
-
-	
-	public boolean isPlayerBuilding(Player thisPlayer){
-		if(amIsBuilding.containsKey(thisPlayer)){
-			return amIsBuilding.get(thisPlayer);
-		} else {
-			this.amIsBuilding.put(thisPlayer, false);
-			return false;
-		}
+	public void deleteRadio(AMChatRadio delThisRadio){
+		String varOwner = delThisRadio.getOwner();
+		String varRadio = delThisRadio.getName();
+		amcMain.logMessage("Destroying: "+varRadio);
+		delThisRadio.lcast("radio has been destroyed");
+		delOwnerRadio(varOwner, varRadio);
+		amRadioList.remove(delThisRadio);
+		amRadioHandles.remove(varRadio);	
 	}
 	
 	public boolean isLoaded(AMChat amcMainPlugin) {
@@ -221,13 +237,115 @@ public class AMChatRadioManager {
 		return newRadioIDString;
 	}	
 	
-	public boolean isLinkValid(String radioID) {
-	 return amRadioHandles.containsKey(radioID);
+	public boolean isLinkValid(String linkID) {
+	 return amRadioHandles.containsKey(linkID);
+	}
+	
+	public boolean isPassValid(String linkID,String linkPass){
+		if(amRadioHandles.containsKey(linkID)&&amRadioHandles.get(linkID).chkPass(linkPass)){
+			return true;
+		} 
+		return false;
+	}
+	
+	public boolean isPlayerRadioAdmin(Player player,String linkID){
+		boolean b = false;
+		if(player.hasPermission("amchat.radio.override.admin")||player.isOp()){
+			b=true;
+		}
+		else if(amRadioHandles.containsKey(linkID)){
+			b=amRadioHandles.get(linkID).isPlayerAdmin(player.getDisplayName());
+		}
+		return b;		
+	}
+	
+	public boolean playerNeedsPass(Player player,String linkID){
+		boolean b=true;
+		if(amRadioHandles.containsKey(linkID)){
+			if(player.hasPermission("amchat.radio.override.admin")||player.isOp()||amRadioHandles.get(linkID).chkPass("")||amRadioHandles.get(linkID).isPlayerMember(player.getDisplayName())||amRadioHandles.get(linkID).isPlayerAdmin(player.getDisplayName())){
+				b=false;
+			}
+		}
+		return b;
 	}
 
-	public void linkMessage(String playerLinkID, String message) {
-		// TODO Auto-generated method stub
-		
+	public void linkMessage(String linkID, String message) {
+		   amRadioHandles.get(linkID).bcast(message);
+	}
+	
+	public AMChatRadio getRadio(String varHandle){
+		return amRadioHandles.get(varHandle);
+	}
+	
+	public ArrayList<AMChatRadio> getRadioList(){
+		return amRadioList;
+	}
+	
+	public boolean linkPlayerToRadio(Player player,String linkID){
+		//canLink
+		if(amRadioHandles.containsKey(linkID)){
+			if(amcMain.canLink(amRadioHandles.get(linkID), player)){
+		if(amRadioHandles.get(linkID).roomToJoin()){
+			amRadioHandles.get(linkID).linkPlayer(player);	
+			amcMain.setPlayerLinkID(player, amRadioHandles.get(linkID).getName());
+			amcMain.tunePlayerRadioChannel(player,amRadioHandles.get(linkID).getChan());
+			amcMain.setPlayerRadioCode(player, amRadioHandles.get(linkID).getCode());
+			player.setCompassTarget(amRadioHandles.get(linkID).getLoc());
+			return true;
+		} else {amcMain.amcTools.errorToPlayer(player, "Sorry, you are unable to link to that radio because it is at max capacity.");}
+			}else {
+				amcMain.amcTools.errorToPlayer(player, "Sorry, you are outside of the linkable range.");
+			}
+		} else {
+			amcMain.amcTools.errorToPlayer(player, "Sorry, that link id was invalid.");
+		}
+		amcMain.setPlayerLinkID(player,"none");
+		return false;
+	}
+	
+	public void unlinkPlayerFromRadio(Player player,String linkID){
+		if(amRadioHandles.containsKey(linkID)&& amRadioHandles.get(linkID).isPlayerUser(player)){
+			amRadioHandles.get(linkID).delUser(player);
+			amcMain.amcTools.msgToPlayer(player, "you have been disconnected from ", linkID);	
+		}
+		amcMain.setPlayerLinkID(player,"none");
+	}
+	
+	public void addOwnerRadio(String varName,String varRadioID){
+		if(ownerTowers.containsKey(varName)){
+			ArrayList<String> exTowers = ownerTowers.get(varName);
+			if(!exTowers.contains(varRadioID)){
+				exTowers.add(varRadioID);
+				ownerTowers.put(varName, exTowers);
+			}
+		} else {
+			ArrayList<String> exTowers = new ArrayList<String>();
+			exTowers.add(varRadioID);
+			ownerTowers.put(varName, exTowers);
+		}
+	}
+
+	public void delOwnerRadio(String varName,String varRadioID){
+		if(ownerTowers.containsKey(varName)){
+			ArrayList<String> exTowers = ownerTowers.get(varName);
+			if(exTowers.contains(varRadioID)){
+				exTowers.remove(varRadioID);
+				ownerTowers.put(varName, exTowers);
+			}
+		} else {
+			ArrayList<String> exTowers = new ArrayList<String>();
+			ownerTowers.put(varName, exTowers);
+		}
+	}
+	
+
+	
+	public ArrayList<String> getOwnerRadios(String varName){
+		ArrayList<String> exTowers = new ArrayList<String>();
+		if(ownerTowers.containsKey(varName)){
+		exTowers = ownerTowers.get(varName);
+		}
+		return exTowers;
 	}
 	
 	//This creates the Object Map from a Radio

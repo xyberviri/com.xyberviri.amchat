@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -33,6 +34,7 @@ public class AMChat extends JavaPlugin {
 	
 	// Settings
 	String varMsgFormat = ChatColor.DARK_GREEN+"["+ChatColor.GOLD+"%FREQ.%CODE"+ChatColor.GRAY+"%SUFFIX"+ChatColor.DARK_GREEN+"]"+ChatColor.YELLOW+"%SENDER"+ChatColor.WHITE+": %MESSAGE";
+	//String varBCsatMsgFormat = ChatColor.DARK_GREEN+"["+ChatColor.GOLD+"%LINKID"+ChatColor.DARK_GREEN+"]"+ChatColor.YELLOW+"%SENDER"+ChatColor.WHITE+": %MESSAGE";
 	String varRadioFreqSuffix = "rHz"; 		// frequency string name
 	
 	//these are double because we calculate the distance versus this, and that variable is a double
@@ -52,11 +54,16 @@ public class AMChat extends JavaPlugin {
 	int varRadioMaxCuttoff = 15;
 	int varRadioMinCode = 0;			// this is the minimum valid code key, 0 = disabled; This really shouldn't be changed.
 	int varRadioMaxCode = 999;			// max value encryption key we will use for transmission.
+
+	int varScheduleTickRate=20;			//This is the value for the tick rate used by the scheduler
 	
 	int varHeldItemID = 345;			// the held item that is our radio
 	boolean varHeldItemReq = false;		// is the held item needed so we can use our radio.
 	
-	
+	double varFixedRadioRangeMod=10;	// this is the distance each antenna block gives our fixed radios.	
+	int varFixedRadioUserModI=1;		// this is the additional number of users that a radio can support with each additional iron block
+	int varFixedRadioUserModG=3;		// "		"		"		"		"		"		gold block
+	int varFixedRadioUserModD=7;		// "		"		"		"		"		"		diamond block
 	
 	ArrayList<String>    playerRadioOn = new ArrayList<String>();				// List of players with Radios On
 	Map<Player, Integer> playerRadioChannel = new HashMap<Player, Integer>(); 	// player radio channel
@@ -65,6 +72,7 @@ public class AMChat extends JavaPlugin {
 	Map<Player, Boolean> playerRadioFilter = new HashMap<Player, Boolean>();	// Player radio filter blocks encrypted chat that is otherwise unreadable
 	Map<Player, Integer> playerRadioCutoff = new HashMap<Player, Integer>();	// Player radio cutoff blocks other channels, i.e. cross talk, we might make this a integer later
 	Map<Player, String>  playerRadioLinkID = new HashMap<Player,String>();		// If a player is linked to a tower this will be set to something. 		
+	Map<Player, ArrayList<String>>  playerFavRadios = new HashMap<Player,ArrayList<String>>();
 	
 	//Player Settings File Reload/Get/Save//
 	public void reloadConfigPlayerRadioSettings(){
@@ -117,10 +125,17 @@ public class AMChat extends JavaPlugin {
 		this.varRadioAutoOn = amcConfig.getBoolean("radio-auto-on", varRadioAutoOn);
 		this.varHeldItemID = amcConfig.getInt("radio-item-id",varHeldItemID);
 		this.varHeldItemReq = amcConfig.getBoolean("radio-item-required", varHeldItemReq);
+		this.varFixedRadioRangeMod=amcConfig.getDouble("antenna-range-mod", varFixedRadioRangeMod);
+		
+		this.varFixedRadioUserModI = amcConfig.getInt("antenna-user-mod-iron",varFixedRadioUserModI);
+		this.varFixedRadioUserModG = amcConfig.getInt("antenna-user-mod-gold",varFixedRadioUserModG);
+		this.varFixedRadioUserModD = amcConfig.getInt("antenna-user-mod-diamond",varFixedRadioUserModD);
+		this.varScheduleTickRate = amcConfig.getInt("antenna-tick-rate",varScheduleTickRate);
 	}
 	
 	public void saveSettings(){
 		amcConfig.set("radio-format", varMsgFormat);
+		//amcConfig.set("broadcast-format", varBCsatMsgFormat);
 		amcConfig.set("radio-suffix",varRadioFreqSuffix);
 		amcConfig.set("chat-distance",varPlayerMaxChatDist);
 		amcConfig.set("radio-distance", varRadioMaxChatDist);
@@ -136,6 +151,11 @@ public class AMChat extends JavaPlugin {
 		amcConfig.set("radio-auto-on", varRadioAutoOn);	
 		amcConfig.set("radio-item-id",varHeldItemID);
 		amcConfig.set("radio-item-required", varHeldItemReq);
+		amcConfig.set("antenna-range-mod", varFixedRadioRangeMod);
+		amcConfig.set("antenna-user-mod-iron",varFixedRadioUserModI);
+		amcConfig.set("antenna-user-mod-gold",varFixedRadioUserModG);
+		amcConfig.set("antenna-user-mod-diamond",varFixedRadioUserModD);
+		amcConfig.set("antenna-tick-rate",varScheduleTickRate);
 		this.saveConfig();
 	}
 	
@@ -163,6 +183,7 @@ public class AMChat extends JavaPlugin {
 		
 
 		this.getServer().getPluginManager().registerEvents(amcListener, this);
+		this.getServer().getScheduler().scheduleSyncRepeatingTask(this, new AMChatRadioCheck(this),20,varScheduleTickRate);
 		
 		this.getCommand("am").setExecutor(amcCmd);
 		this.getCommand("xm").setExecutor(amcCmd);
@@ -182,6 +203,7 @@ public class AMChat extends JavaPlugin {
 		if (this.isEnabled()){this.getServer().getPluginManager().disablePlugin(this);
 		amcLogger.severe("["+amcPdf.getName()+"] WARNING Plugin auto disable triggered.");}}
 		
+	@SuppressWarnings("unchecked")
 	public void loadPlayerRadioSettings(Player player){
 		boolean playerHasSettings;		
 		Map<String, Object> playerSetting = new HashMap<String,Object>();
@@ -233,11 +255,18 @@ public class AMChat extends JavaPlugin {
 		} else {
 			setPlayerRadioCutoff(player, varRadioMaxCuttoff);
 		}
-		
+		//String last link we had on logout. 
 		if (playerHasSettings && playerSetting.containsKey("link") && amcRadMan.isLinkValid((String) playerSetting.get("link"))){
-			setPlayerLinkID(player, (String) playerSetting.get("link"));
+			amcRadMan.linkPlayerToRadio(player, (String) playerSetting.get("link"));
 		} else {
 			setPlayerLinkID(player, "none");
+		}
+		//ArrayList<String> Players favorite radios
+		if(playerHasSettings && playerSetting.containsKey("favorites")){
+			Object objAdmin=playerSetting.get("favorites");
+			if (objAdmin instanceof ArrayList<?>){
+				this.setFavRadios(player, (ArrayList<String>) objAdmin);	
+			}				
 		}
 		
 		if(!playerHasSettings){
@@ -255,12 +284,64 @@ public class AMChat extends JavaPlugin {
 	playerSetting.put("filter",getPlayerFilter(player));
 	playerSetting.put("cutoff",getPlayerCutoff(player));
 	playerSetting.put("link",getPlayerLinkID(player));
+	playerSetting.put("favorites", getFavRadios(player));
 	//playerSettings.put(player.getDisplayName(), playerSetting);
 	//playerRadioConfig.createSection("radio-settings",playerSettings);
 	playerRadioConfig.createSection(player.getDisplayName(), playerSetting);
 	saveConfigPlayerRadioSettings();
 	}
 	
+	
+	
+	//Add This ID to a players bookmark list
+	public void addFavRadio(Player player,String varRadioID){
+		ArrayList<String> favRadio = new ArrayList<String>();
+		if(playerFavRadios.containsKey(player)){
+			favRadio = playerFavRadios.get(player);
+			if(!favRadio.contains(varRadioID)){	// Don't add duplicates
+				favRadio.add(varRadioID);
+			}
+		} else {			
+			favRadio.add(varRadioID);
+		}
+		playerFavRadios.put(player, favRadio);
+	}
+
+	//Delete This ID from the players bookmark list.
+	public void delFavRadio(Player player,String varRadioID){  
+		ArrayList<String> favRadio = new ArrayList<String>();
+		if(playerFavRadios.containsKey(player)){
+			favRadio = playerFavRadios.get(player);
+			if(favRadio.contains(varRadioID)){
+				favRadio.remove(varRadioID);				
+			}
+		}
+		this.playerFavRadios.put(player, favRadio);
+	}
+	
+	public ArrayList<String> getFavRadios(Player player){
+		ArrayList<String> favRadio = new ArrayList<String>();
+		if(playerFavRadios.containsKey(player)){
+			favRadio = playerFavRadios.get(player);
+		}
+		else {
+			this.playerFavRadios.put(player, favRadio);
+		}
+		return favRadio;
+	}
+	
+	//Set all of the players favorites, this is really just for use during loading.  
+	private void setFavRadios(Player player,ArrayList<String> favList){
+		this.playerFavRadios.put(player, favList);
+	}
+   	
+	//return true if the player is linked to a radio transmitter. 
+	public boolean isPlayerLinked(Player player){
+		if(getPlayerLinkID(player).equalsIgnoreCase("none")){
+			return false;
+		}
+		return true;		
+	}
 	//Get Players Radio link id, if the key is missing set it to none
 	public String getPlayerLinkID(Player player) {
 		if (!playerRadioLinkID.containsKey(player)){
@@ -271,9 +352,7 @@ public class AMChat extends JavaPlugin {
 	
 	//Set Players Radio link id, if the give id is blank its set to none
 	public void setPlayerLinkID(Player player,String linkID){
-		if(linkID.isEmpty()){
-			linkID="none";
-			}
+		if(linkID.isEmpty()){linkID="none";}
 		amcTools.msgToPlayer(player, "[Link]: ",linkID);
 		this.playerRadioLinkID.put(player, linkID);
 	}
@@ -304,6 +383,16 @@ public class AMChat extends JavaPlugin {
 		return this.varSkyWaveEnabled;
 	}	
 
+	//This is resource intensive don't use it allot. 
+	public List<Player> getPlayersByLinkID(String varLinkID){
+		List<Player> varList = new ArrayList<Player>();
+		for(Player linkID: playerRadioLinkID.keySet()){
+			if(playerRadioLinkID.get(linkID).equals(varLinkID)){
+				varList.add(linkID);
+			}
+		}
+		return varList;
+	}
 
 
 	// Returns Array of all players with "On" Radio
@@ -383,6 +472,35 @@ public class AMChat extends JavaPlugin {
 			playerOnThisChan = varRadioDefFreq;
 		}		
 		return playerOnThisChan;	
+	}
+	
+	public void scanPlayerRadioChannel(Player player,boolean varDirection){
+		if(isPlayerLinked(player)){
+			amcTools.msgToPlayer(player, "TODO:Scanning for radio links direction up:"+varDirection);
+		} else {
+		int playerOnThisChan = varRadioMinFreq;
+		if(playerRadioChannel.containsKey(player)){
+			int currentChan = playerRadioChannel.get(player);
+			int scanValue = playerRadioCutoff.get(player);
+			//SCAN UP
+			if(varDirection){
+				playerOnThisChan=currentChan+scanValue;
+			if(playerOnThisChan>varRadioMaxFreq){
+				playerOnThisChan=varRadioMinFreq+(playerOnThisChan-varRadioMaxFreq);
+			}
+			//SCAN DOWN	
+			}else {
+				playerOnThisChan=currentChan-scanValue;	
+				if(playerOnThisChan< varRadioMinFreq){
+					playerOnThisChan=varRadioMaxFreq-(playerOnThisChan+varRadioMinFreq);
+				}				
+			}
+		}else {
+			playerRadioChannel.put(player,varRadioDefFreq);
+			playerOnThisChan = varRadioDefFreq;
+		}
+		tunePlayerRadioChannel(player,playerOnThisChan);
+		}
 	}
 	
 	// Return the integer of the radio code the player is using
@@ -480,6 +598,55 @@ public class AMChat extends JavaPlugin {
 		return true;
 	}	
 	
+	public boolean canReceive(AMChatRadio radio, Player player) {
+		if (player.hasPermission("amchat.radio.hearall")||player.isOp()){
+			return true;
+			}			
+		if(!isRadioOn(player)){//The player doesn't even have his radio on			
+			return false;
+			} 
+		
+		if(!radio.getLoc().getWorld().equals(player.getWorld())){ //we can't talk to the other side.
+			return false;
+			}
+		
+		if (radio.getChan() < (playerRadioChannel.get(player) - playerRadioCutoff.get(player)) ){
+			//Radio chat is below cutoff limit
+			return false;
+		} else if (radio.getChan() > (playerRadioChannel.get(player) + playerRadioCutoff.get(player))  ) {
+			//Radio channel is above the cutoff limit
+			return false;
+		}
+		if((!playerRadioChannel.get(player).equals(radio.getChan()))&&(!playerRadioCode.get(player).equals(radio.getCode()))&&(playerRadioFilter.get(player))){
+			//message is encrypted and we don't want to hear that.	
+			return false;
+			}
+		if(varLimitRadioChat){
+			if (!radio.isAdmin()&&(amcTools.getDistance(radio.getLoc(), player.getLocation()) > radio.getMaxDistance())){
+				return false;
+				}
+			}
+		return true;
+	}	
+	
+	public boolean canLink(AMChatRadio radio, Player player) {
+		if (player.hasPermission("amchat.override.link")||player.isOp()){
+			return true;
+			}			
+		if(!isRadioOn(player)){//The player doesn't even have his radio on			
+			return false;
+			} 
+		
+		if(!radio.getLoc().getWorld().equals(player.getWorld())){ //we can't talk to the other side.
+			return false;
+			}
+		if(varLimitRadioChat){
+			if (!radio.isAdmin()&&(amcTools.getDistance(radio.getLoc(), player.getLocation()) > radio.getMaxDistance())){
+				return false;
+				}
+			}
+		return true;
+	}		
 	//same logic for checking if players can receive is implied here.
 	public boolean canRead(Player sender, Player player) {
 		//Sender is Receiver
@@ -494,6 +661,19 @@ public class AMChat extends JavaPlugin {
 		} 
 		return false;
 	}
+	
+	public boolean canRead(AMChatRadio radio, Player player) {
+		//Sender is not encrypting chat
+		if (radio.getCode()==0){return true;}
+		//Receiver has read all permission
+		if (player.hasPermission("amchat.radio.readall")||player.isOp()){return true;}
+		//the player and receiver are on the same channel with the same key
+		if((playerRadioCode.get(player).equals(radio.getCode()))&&(playerRadioChannel.get(player).equals(radio.getChan()))){
+			return true;
+		} 
+		return false;	
+		
+	}	
 	
 	public boolean canPing(Player sender, Player player) {
 		if(varLimitRadioChat){
@@ -514,6 +694,5 @@ public class AMChat extends JavaPlugin {
 		}
 		
 	}
-	
 	
 }//EOF

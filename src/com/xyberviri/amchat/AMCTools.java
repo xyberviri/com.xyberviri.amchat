@@ -73,6 +73,7 @@ public class AMCTools {
 			amcMain.amcLogger.info(message);
 		}
 	}	
+
 	
 	//Formatter for Radio chat by broadcasting player
 	public String createMessage(Player player,String message){

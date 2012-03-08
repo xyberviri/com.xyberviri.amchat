@@ -20,6 +20,7 @@ public class AMChatRouter {
 		// If were dealing with radio chat its going here.
 		if(amcMain.isRadioOn(sender)&&amcMain.getPlayerMic(sender)){
 			message = amcMain.amcTools.createMessage(sender, message);
+			
 			if (amcMain.getPlayerLinkID(sender).equalsIgnoreCase("none")){
 				toRadio(sender,message);
 				} 
