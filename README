@@ -39,36 +39,80 @@ Description: toggle your filter on/off, if you can't read the text clearly turn 
 Command: /am home
 Description: Sets all your settings to the default you get when first joining the server
 
-Command: /am ping
+Command: /am ping <playername>
+Description: sends a ping to the player with your info, Freq/Code, affected by radio range rules. 
 
 Console Command: am list
 Description: view all the players online, with active radio’s and what settings they have.(good when people are complaining why something isn’t working)
 
+Console Command: xm list
+Description: View all Radio's on the server along with all settings
+
+Console Command: xm check
+Description: This manually runs the scheduled task, it is not recommended to run this command manually, this is left over from development.  
+
 TODO LOG:
-Add Range Check on ping command
 Add Setting for handeling nether/ender/multi verse.
 Add Features for Nether such as 8x multiplyer. 
+Add Skywave Feature for Day/Night Cycle. 
 
 CHANGE LOG
 Version 0.2
-Added amchat.local.hearall permission so player can always receive any message sent reguardless of range over local chat
-Added OPs are able to hear all local chat.
-Added amchat.radio.hearall permission so player can always receive any message sent reguardless of range radio chat
-Added OPs are able to receive all chat reguardless of range
-Added amchat.radio.readall permission so player can be able to read all chat.
-Added OPs are able to read all chat. 
-Added following permissions to /am tune, cutoff and code commands
-amchat.radio.override.tune     - this lets you tune to any frequency, always true for ops
-amchat.radio.override.code     - this lets you use any code including negative ones, always true for ops
-amchat.radio.override.cutoff   - this permission lets you set any cutoff(negatives will default to 0), always true for ops.
+Added /OPs are able to hear all local chat.
+Added /OPs are able to receive all chat regardless of range
+Added /OPs are able to read all chat. 
 Added Ping usage is /am ping playername permission is amchat.radio.personal.ping
 Change Chat router to use methods instead of direct var access, there are still some calls directly but there are significantly less now. 
-Added Radio Link ID varible in AMChat main, Added Setter(will set to "none" on empty string)/added Getter method for varible.
+Added Radio Link ID varible in AMChat main
 Removed world check for amTools.getDistance
 Added public method AMChatRadioManager.genSerial, this generates a serial number for radios
 Added Custom Config for player radio settings>in pl.settings.yml
 Added method to load/save player settings, these save between server restarts. 
 Added Custom Config for fixed radio settings>rm.settings.yml
+Added Radio Transmitters, These are radio radios that allow you to transmit farther. 
+Added Operator override permissions for all command that have limits, these let you override any setting, use with caution.
+Added Operator override permissions for all radio functions, such as linking/setting commands. 
+Radios are Created while in "sneak mode" and placing a Record player.
+Added Ability for players to have a favorites list of radio's, this does not require them to be able to join the radio in order to add it, how ever they do have to join it before using short cuts willwork.
+Added shortcut for favorites /XM #, # being a valid radio listed under /xm fav, type /xm fav id, to toggle a radio id as part of your favorites list. 
+Added Sign Feature which lists basic information about the radio, simply place any sign on the radio and it will automatically update the sign with details about the radio. Sign prefrence is N E W S, it will only update one sign.
+Radio radios can be modified as follows, add 1 iron fence to increase the range,default 10m, add 1 iron/gold/diamond to add X number of users, default 1/3/4.
+Radio towers have a default capacity of 1
+Any block other than Iron Fence/Iron/Gold/Diamond/Obsidian will break the antenna, this includes air. 
+Added operator list commands for in-game(with permissions), /XM list & /AM list, this is resource intensive so try not to use it too much. 
+Backwards compatible to 1.1-R1
 
 
-
+Permissions list
+amchat.local.hearall            	Hear all local chat regardless of range
+amchat.radio.list.*					Grants both list permissions		
+amchat.radio.list.personal			List all active player radios with settings
+amchat.radio.list.fixed				List all fixed radios with important information.
+amchat.radio.hearall				Hear all radio chat regardless of range/frequency
+amchat.radio.readall				Read all radio chat regardless of code/frequency
+amchat.radio.override.*				Grants all overrides
+amchat.radio.override.tune			Tune to any # including zero or negatives
+amchat.radio.override.code			Set any encryption code with in respect to java
+amchat.radio.override.cutoff		Set any Positive value for cutoff
+amchat.radio.override.set			Override “isAdmin” check when attempting to use /xm set
+amchat.radio.override.admin			Override all “isAdmin” checks for fixed radio towers
+amchat.radio.override.link			Never require a password to link to a radio
+amchat.radio.override.info			Show all information when using /xm info command
+amchat.radio.personal.*				Grants all personal radio permissions
+amchat.radio.personal.use			permission to use /am command		/am
+amchat.radio.personal.radio			permission to turn radio on/off		/am radio
+amchat.radio.personal.mic			permission to adjust mic 			/am mic
+amchat.radio.personal.filter		permission to adjust filter 		/am filter
+amchat.radio.personal.tune			permission to adjust frequency 		/am tune #
+amchat.radio.personal.code			permission to adjust encrypt code	/am code #
+amchat.radio.personal.cutoff		permission to adjust cutoff 		/am cutoff 0-#
+amchat.radio.personal.home			permission to use the 				/am home command
+amchat.radio.personal.ping			permission to use 					/am ping <player> command
+amchat.radio.fixed.*				Grants all fixed radio permission
+amchat.radio.fixed.create			permission to create new fixed radio’s
+amchat.radio.fixed.use				permission to use 					/xm command
+amchat.radio.fixed.link				permission to use					/xm link <id> command
+amchat.radio.fixed.set				permission to use 					/xm set <pass|code|freq|admin> <value>
+amchat.radio.fixed.chown   			permission to give away ownership 	/xm chown <id> <player>| /xm chown <id> <offline player> <offlineplayername 2ndtime> 
+amchat.radio.fixed.fav  			permission to use 					/xm fav and /xm # commands /xm fav|/xm fav <id>|/xm #
+amchat.radio.fixed.info				permission to use 					/xm info command /xm info <id>
