@@ -262,7 +262,7 @@ public class AMChatRadioManager {
 	public boolean playerNeedsPass(Player player,String linkID){
 		boolean b=true;
 		if(amRadioHandles.containsKey(linkID)){
-			if(player.hasPermission("amchat.radio.override.admin")||player.isOp()||amRadioHandles.get(linkID).chkPass("")||amRadioHandles.get(linkID).isPlayerMember(player.getDisplayName())||amRadioHandles.get(linkID).isPlayerAdmin(player.getDisplayName())){
+			if(player.hasPermission("amchat.radio.override.admin")||player.isOp()||amRadioHandles.get(linkID).chkPass("")||amRadioHandles.get(linkID).isPlayerMember(player.getDisplayName())||amRadioHandles.get(linkID).isPlayerAdmin(player.getDisplayName())||amRadioHandles.get(linkID).isPlayerOwner(player.getDisplayName())){
 				b=false;
 			}
 		}
