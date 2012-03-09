@@ -234,11 +234,22 @@ public class AMChatCmd implements CommandExecutor {
 						varHandleList="["+varHandle+"] "+varHandleList;
 					}
 					amcMain.amcTools.msgToPlayer(player,">",varHandleList);
-				}				
+				}	
+				amcMain.amcTools.msgToPlayer(player,"Fav Radios:");
+				varRadios=amcMain.getFavRadios(player);
+				if(varRadios.isEmpty()){
+					amcMain.amcTools.msgToPlayer(player,"none");
+				} else {
+					String varFavList ="";
+					for(String varHandle : varRadios){
+						varFavList="["+varHandle+"] "+varFavList;
+					}
+					amcMain.amcTools.msgToPlayer(player,">",varFavList);
+				}
 				return true;
 			}
 			
-			
+			//XM list
 			if ((player.hasPermission("amchat.radio.list.fixed")||player.isOp()) && args[0].equalsIgnoreCase("list")){
 				if (amcMain.amcRadMan.getRadioList().isEmpty()){
 					amcMain.amcTools.msgToPlayer(player,"The radio manager isn't tracking any radio's");
@@ -254,6 +265,8 @@ public class AMChatCmd implements CommandExecutor {
 				}
 				return true;
 			}	
+			
+			
 			
 			//XM link
 			if((player.hasPermission("amchat.radio.fixed.link")||player.isOp()) && args[0].equalsIgnoreCase("link")){
@@ -271,20 +284,21 @@ public class AMChatCmd implements CommandExecutor {
 						
 					}
 				}
-				//if this has more than 1 arg were trying to do something, check if the 2nd ARG is a valid link
+				//XM link args[1] something, args[1] should be a linkid
 				else if(!amcMain.amcRadMan.isLinkValid(args[1])){
 					amcMain.amcTools.msgToPlayer(player, "That link id:"+args[1]+" is invalid.");
-					return false;
+					return true;
 				}
 				
 				//XM link <radio-id>|none
 				else if(args.length==2){
 					if(args[1].equalsIgnoreCase("none")){
-						amcMain.setPlayerLinkID(player, "none");
+						//amcMain.setPlayerLinkID(player, "none");
+						amcMain.amcRadMan.unlinkPlayerFromRadio(player, amcMain.getPlayerLinkID(player));
 					} else {
 						if(amcMain.amcRadMan.playerNeedsPass(player, args[1])){
 							amcMain.amcTools.msgToPlayer(player, "This link requires a password to join.");
-							return false;
+							return true;
 						} else {					
 							
 							amcMain.amcRadMan.linkPlayerToRadio(player, args[1]);
@@ -428,10 +442,86 @@ public class AMChatCmd implements CommandExecutor {
 				return true;
 			}
 			
+			//lists favorites, adds favorites, remove favorites.
+			//XM FAV <id>
+			if((player.hasPermission("amchat.radio.fixed.fav")||player.isOp()) && args[0].equalsIgnoreCase("fav")){
+				if(args.length==1){
+					if(amcMain.getFavRadios(player).isEmpty()){
+						amcMain.amcTools.msgToPlayer(player, "you're favorites list is empty");
+					} else {
+					int x=1;
+					String varMsg="";
+					for (String varRadioID :amcMain.getFavRadios(player)){
+						varMsg="#"+x+"["+varRadioID+"] "+varMsg;
+						x++;
+					}
+					amcMain.amcTools.msgToPlayer(player,"Favorites: ",varMsg);
+					}
+				} else if (args.length==2){
+					String varMsg = "";
+					if(amcMain.amcRadMan.isLinkValid(args[1])){
+						
+						if(amcMain.isFavRadio(player,args[1])){
+							varMsg="Deleted: "+args[1];
+							amcMain.delFavRadio(player, args[1]);
+						} else {
+							varMsg="Added: "+args[1];
+							amcMain.addFavRadio(player, args[1]);
+						}
+					} else {
+						varMsg=args[1]+" was not a valid link id";
+					}
+					amcMain.amcTools.msgToPlayer(player,varMsg);
+				}
+				
+				
+				
+				return true;
+			}
+			
+			if((player.hasPermission("amchat.radio.fixed.fav")||player.isOp()) && args.length==1){
+				if(amcMain.getFavRadios(player).isEmpty()){
+					amcMain.amcTools.msgToPlayer(player,"you dont have any favorites saved, use the fav command to toggle favorites, ","/xm fav <radioid>");
+				} else {
+				int targetValue=0;
+				try {
+					targetValue = Integer.parseInt(args[0]);
+					targetValue--;
+					
+				}  catch (NumberFormatException e){
+					amcMain.amcTools.errorToPlayer(player,args[0] + "is not a number!");
+					return true;
+					}
+				if (targetValue < 0){
+					amcMain.amcTools.errorToPlayer(player,"invaid id #, valid numbers are 1+");
+					return true;
+				}
+				
+				ArrayList<String>playerFavs = amcMain.getFavRadios(player);
+				
+				if(targetValue > playerFavs.size()){
+					amcMain.amcTools.errorToPlayer(player,"invalid favorite id, max id # "+playerFavs.size());
+				} 
+				else{
+					String varRadioID= playerFavs.get(targetValue);
+					if(amcMain.amcRadMan.isLinkValid(varRadioID)){
+						if(amcMain.amcRadMan.playerNeedsPass(player, varRadioID)){
+							amcMain.amcTools.errorToPlayer(player,"Im sorry but you need to join ["+varRadioID+"] first before you can use this function.");
+						} else {
+							amcMain.amcRadMan.linkPlayerToRadio(player, varRadioID);
+						}						
+					}else{
+						amcMain.amcTools.errorToPlayer(player,"Im sorry but that link id appears to no longer be valid.");
+					}					
+				}
+				
+				}
+				
+				return true;
+			}
 			
 			
-			
-			return false;
+		//End of XM commands
 		}
 		
 		
