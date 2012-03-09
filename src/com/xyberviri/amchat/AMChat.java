@@ -291,7 +291,12 @@ public class AMChat extends JavaPlugin {
 	saveConfigPlayerRadioSettings();
 	}
 	
-	
+	public boolean isFavRadio(Player player,String VarRadioID){
+		if(playerFavRadios.containsKey(player)){
+			return playerFavRadios.get(player).contains(VarRadioID);
+		}
+	return false;
+	}
 	
 	//Add This ID to a players bookmark list
 	public void addFavRadio(Player player,String varRadioID){
@@ -630,7 +635,7 @@ public class AMChat extends JavaPlugin {
 	}	
 	
 	public boolean canLink(AMChatRadio radio, Player player) {
-		if (player.hasPermission("amchat.override.link")||player.isOp()){
+		if (player.hasPermission("amchat.radio.override.link")||player.isOp()){
 			return true;
 			}			
 		if(!isRadioOn(player)){//The player doesn't even have his radio on			

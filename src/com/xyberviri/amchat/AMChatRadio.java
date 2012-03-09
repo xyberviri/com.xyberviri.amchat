@@ -77,6 +77,16 @@ public class AMChatRadio {
 //	private void sendRelay(AMChatRelayPacket amcRelayPacket){
 //		
 //	}
+	public String getSigStr(){
+		int varSig =varRadioIBlocks+65;
+		return varSig+"dB";	
+	}
+	
+	//Return the Network Capacity this radio has.
+	public int getNWCap(){
+		return varRadioOBlocks;
+	}
+	
 	public int getCurUsers(){
 		return radioUsers.size();
 	}
@@ -153,10 +163,10 @@ public class AMChatRadio {
 	}
 	private void updateSign(BlockFace signFace){
 		Sign sign = (Sign) varRadioLoc.getBlock().getRelative(signFace).getState();
-		sign.setLine(0, "MCCid: "+varRadioName);
+		sign.setLine(0, "MCC-id: "+varRadioName);
 		sign.setLine(1, "Users: "+getCurUsers()+"/"+getMaxUsers());
 		sign.setLine(2, "Range: "+getMaxDistance());
-		sign.setLine(3, "Owner: "+getOwner());
+		sign.setLine(3, "OP: "+getOwner());
 		sign.update();		
 	}
 	//Is this a valid Radio tower should we talk to it, does it work.
@@ -182,7 +192,10 @@ public class AMChatRadio {
 	//Getter/Setter:Password
 	public String getPass() {return varRadioLinkPass;}
 	public void setPass(String varRadioLinkPass) {this.varRadioLinkPass = varRadioLinkPass;}
+	
+	//Check:Password against the input
 	public boolean chkPass(String varInputPass){return varRadioLinkPass.equals(varInputPass);}
+	public boolean isPublic(){return varRadioLinkPass.isEmpty();}
 	
 	//Getter/Setter:Name
 	public String getName() {return varRadioName;}
@@ -227,18 +240,13 @@ public class AMChatRadio {
 		return (this.getCurUsers() < this.getMaxUsers());
 	}
 	
-//	@Deprecated
-//	public boolean canPlayerLink(Player player){
-//		return amcRadMan.amcMain.canReceive(this,player);
-//	}
-	
+	//This function is called when a player joins the radio using a password or upon creation. 
 	public void linkPlayer(Player player){
 		addUser(player);
 		if(!isPlayerMember(player.getDisplayName())){
 			amcRadMan.amcMain.amcTools.msgToPlayer(player, "you have been added to the access list, the pass is no longer required to link.");
-		}
-		amcRadMan.amcMain.amcTools.msgToPlayer(player, "you have been connected to "+varRadioOwner+".");
-		addMember(player.getDisplayName());
+			addMember(player.getDisplayName());
+		}		
 	}
 	
 	//Add/Del Users

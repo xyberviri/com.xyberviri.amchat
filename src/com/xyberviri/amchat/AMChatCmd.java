@@ -3,6 +3,7 @@ package com.xyberviri.amchat;
 import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -46,7 +47,7 @@ public class AMChatCmd implements CommandExecutor {
 				} else{
 					amcMain.logMessage("There are "+amcMain.amcRadMan.getRadioList().size()+" radio(s) on the server.");
 					for(AMChatRadio amcRadSet : amcMain.amcRadMan.getRadioList()){
-						amcMain.logMessage("["+amcRadSet.getName()+"]f:"+amcRadSet.getChan()+" c:"+amcRadSet.getCode()+" loc:"+amcRadSet.getLoc().getWorld().getName()+" "+amcRadSet.getLoc().getBlockX()+", "+amcRadSet.getLoc().getBlockY()+", "+amcRadSet.getLoc().getBlockZ());
+						amcMain.logMessage("["+amcRadSet.getName()+"]f:"+amcRadSet.getChan()+" c:"+amcRadSet.getCode()+" loc:"+amcRadSet.getLoc().getWorld().getName()+" "+amcRadSet.getLocationString());
 					}
 					return true;
 				}
@@ -75,12 +76,12 @@ public class AMChatCmd implements CommandExecutor {
 			
 		//am
 		if (player.hasPermission("amchat.radio.personal.use") && args.length == 0){
-			amcMain.amcTools.msgToPlayer(player,"[-Xmit-Freq-]:"," "+amcMain.getPlayerRadioChannel(player));
-			amcMain.amcTools.msgToPlayer(player,"[-Xmit-Code-]:"," "+amcMain.getPlayerRadioCode(player));
-			amcMain.amcTools.msgToPlayer(player,"[-Xmit-Link-]:"," "+amcMain.getPlayerLinkID(player));
-			amcMain.amcTools.msgToPlayer(player,"[-Mic-Open--]:"," "+amcMain.getPlayerMic(player));
-			amcMain.amcTools.msgToPlayer(player,"[-Cut-Off---]:"," "+amcMain.getPlayerCutoff(player));			
-			amcMain.amcTools.msgToPlayer(player,"[-Filter----]:"," "+amcMain.getPlayerFilter(player));
+			amcMain.amcTools.msgToPlayer(player,"[ FREQ ]:"," "+amcMain.getPlayerRadioChannel(player));
+			amcMain.amcTools.msgToPlayer(player,"[ CODE ]:"," "+amcMain.getPlayerRadioCode(player));
+			amcMain.amcTools.msgToPlayer(player,"[ CUTOFF ]:"," "+amcMain.getPlayerCutoff(player));
+	 		amcMain.amcTools.msgToPlayer(player,"[ LINKID ]:"," "+amcMain.getPlayerLinkID(player));
+			amcMain.amcTools.msgToPlayer(player,"[ MIC ON ]:"," "+amcMain.getPlayerMic(player));
+			amcMain.amcTools.msgToPlayer(player,"[ FILTER ]:"," "+amcMain.getPlayerFilter(player));
 			return true;
 		}
 		
@@ -228,23 +229,53 @@ public class AMChatCmd implements CommandExecutor {
 				if(varRadios.isEmpty()){
 					amcMain.amcTools.msgToPlayer(player,"You dont currently own any radios.");
 				} else {
-					amcMain.amcTools.msgToPlayer(player,"Radio's Owned:",""+varRadios.size());
-					String varHandleList="";
+					amcMain.amcTools.msgToPlayer(player,"Radio's Owned:"," "+varRadios.size());
+					String varHandleList=ChatColor.DARK_GREEN+"";
 					for(String varHandle : varRadios){
-						varHandleList="["+varHandle+"] "+varHandleList;
+						varHandleList=varHandleList+"["+ChatColor.GOLD+varHandle+ChatColor.DARK_GREEN+"] ";
 					}
 					amcMain.amcTools.msgToPlayer(player,">",varHandleList);
 				}	
-				amcMain.amcTools.msgToPlayer(player,"Fav Radios:");
+				amcMain.amcTools.msgToPlayer(player,"Fav Radios:"," "+varRadios.size());
 				varRadios=amcMain.getFavRadios(player);
 				if(varRadios.isEmpty()){
 					amcMain.amcTools.msgToPlayer(player,"none");
 				} else {
 					String varFavList ="";
+					int x=1;
 					for(String varHandle : varRadios){
-						varFavList="["+varHandle+"] "+varFavList;
+						varFavList=varFavList+ChatColor.WHITE+"# "+x+ChatColor.DARK_GREEN+"["+ChatColor.GOLD+varHandle+ChatColor.DARK_GREEN+"]";
+						x++;
 					}
 					amcMain.amcTools.msgToPlayer(player,">",varFavList);
+				}
+				return true;
+			}
+			
+			//XM info ID
+			if((player.hasPermission("amchat.radio.fixed.info")||player.isOp())&&args[0].equalsIgnoreCase("info")&&args.length==2){
+				String tarRadioID = args[1].toUpperCase();
+				if(amcMain.amcRadMan.isLinkValid(tarRadioID)){
+					AMChatRadio tarRadio = amcMain.amcRadMan.getRadio(tarRadioID);
+					amcMain.amcTools.msgToPlayer(player,"MCC-ID: ",tarRadio.getName());
+					amcMain.amcTools.msgToPlayer(player,"Power: ",tarRadio.getSigStr());
+					amcMain.amcTools.msgToPlayer(player,"Range: ",tarRadio.getMaxDistance()+"m");
+					if(player.hasPermission("amchat.radio.override.info")||tarRadio.isPublic()||tarRadio.isPlayerMember(player.getDisplayName())){
+						amcMain.amcTools.msgToPlayer(player,"Freq:"," "+tarRadio.getChan());
+						amcMain.amcTools.msgToPlayer(player,"Code:"," "+tarRadio.getCode());
+						amcMain.amcTools.msgToPlayer(player,"Loc:"," "+tarRadio.getLocationString());
+						if(tarRadio.isPublic()){
+							amcMain.amcTools.msgToPlayer(player,"Pass: "," ");
+						} else {
+							amcMain.amcTools.msgToPlayer(player,"Pass:"," "+tarRadio.getPass());
+						}				
+						amcMain.amcTools.msgToPlayer(player,"User:",tarRadio.getCurUsers()+"/"+tarRadio.getMaxUsers());
+					}
+					
+					amcMain.amcTools.msgToPlayer(player,"Oper:"," "+tarRadio.getOwner());
+					
+				}else{
+					amcMain.amcTools.msgToPlayer(player,tarRadioID+ " is not a valid MCC-ID");
 				}
 				return true;
 			}
@@ -294,7 +325,7 @@ public class AMChatCmd implements CommandExecutor {
 				else if(args.length==2){
 					if(args[1].equalsIgnoreCase("none")){
 						//amcMain.setPlayerLinkID(player, "none");
-						amcMain.amcRadMan.unlinkPlayerFromRadio(player, amcMain.getPlayerLinkID(player));
+						amcMain.amcRadMan.unlinkPlayerFromRadio(player, amcMain.getPlayerLinkID(player),true);
 					} else {
 						if(amcMain.amcRadMan.playerNeedsPass(player, args[1])){
 							amcMain.amcTools.msgToPlayer(player, "This link requires a password to join.");
@@ -322,7 +353,7 @@ public class AMChatCmd implements CommandExecutor {
 			}			
 			//XM unlink
 			if((player.hasPermission("amchat.radio.fixed.link")||player.isOp()) && args[0].equalsIgnoreCase("unlink") && args.length == 1){
-				amcMain.amcRadMan.unlinkPlayerFromRadio(player, amcMain.getPlayerLinkID(player));
+				amcMain.amcRadMan.unlinkPlayerFromRadio(player, amcMain.getPlayerLinkID(player),true);
 				return true;
 			}
 			//XM chown radioid <online player name>
@@ -452,24 +483,26 @@ public class AMChatCmd implements CommandExecutor {
 					int x=1;
 					String varMsg="";
 					for (String varRadioID :amcMain.getFavRadios(player)){
-						varMsg="#"+x+"["+varRadioID+"] "+varMsg;
+						varMsg=varMsg+"#"+x+"["+varRadioID+"] ";
 						x++;
 					}
 					amcMain.amcTools.msgToPlayer(player,"Favorites: ",varMsg);
 					}
 				} else if (args.length==2){
+					
 					String varMsg = "";
-					if(amcMain.amcRadMan.isLinkValid(args[1])){
+					String varLinkID=args[1].toUpperCase();
+					if(amcMain.amcRadMan.isLinkValid(varLinkID)){
 						
-						if(amcMain.isFavRadio(player,args[1])){
-							varMsg="Deleted: "+args[1];
-							amcMain.delFavRadio(player, args[1]);
+						if(amcMain.isFavRadio(player,varLinkID)){
+							varMsg="Deleted: "+varLinkID;
+							amcMain.delFavRadio(player, varLinkID);
 						} else {
-							varMsg="Added: "+args[1];
-							amcMain.addFavRadio(player, args[1]);
+							varMsg="Added: "+varLinkID;
+							amcMain.addFavRadio(player, varLinkID);
 						}
 					} else {
-						varMsg=args[1]+" was not a valid link id";
+						varMsg=varLinkID+" was not a valid link id";
 					}
 					amcMain.amcTools.msgToPlayer(player,varMsg);
 				}
@@ -479,6 +512,8 @@ public class AMChatCmd implements CommandExecutor {
 				return true;
 			}
 			
+			//XM #
+			//Auto Link to Favorite Radio #, no validation is performed. 
 			if((player.hasPermission("amchat.radio.fixed.fav")||player.isOp()) && args.length==1){
 				if(amcMain.getFavRadios(player).isEmpty()){
 					amcMain.amcTools.msgToPlayer(player,"you dont have any favorites saved, use the fav command to toggle favorites, ","/xm fav <radioid>");
@@ -489,7 +524,7 @@ public class AMChatCmd implements CommandExecutor {
 					targetValue--;
 					
 				}  catch (NumberFormatException e){
-					amcMain.amcTools.errorToPlayer(player,args[0] + "is not a number!");
+					amcMain.amcTools.errorToPlayer(player,args[0] + " is not a number!");
 					return true;
 					}
 				if (targetValue < 0){

@@ -39,7 +39,7 @@ commands:
    am ping:
       description: send your info to another player
       permission: amchat.radio.personal.ping
-      usage: Usage /am ping playername
+      usage: Usage /am ping <playername>
    am list:
       description: lists all of the players online with active radios and what they are set to.
       permission: amchat.radio.list.personal
@@ -49,13 +49,13 @@ commands:
       permission: amchat.radio.fixed.use
       usage: Usage /xm
    xm list:
-      description: display information about your fixed radio towers
-      permission: amchat.radio.fixed.list
-      usage: Usage /xm
+      description: lists all of the radios on the server with all information.
+      permission: amchat.radio.list.fixed
+      usage: Usage /xm list
    xm link:
       description: link to a fixed radio tower, a password is required in most cases.
       permission: amchat.radio.fixed.link
-      usage: Usage /xm link-id password
+      usage: Usage /xm <id> <password>
    xm unlink:
       description: unlinks from a radio tower
       permission: amchat.radio.fixed.link
@@ -67,12 +67,16 @@ commands:
    xm chown:
       description: change the owner of a tower you own to another player, if the player is offline their name has to be entered twice.
       permission: amchat.radio.fixed.chown
-      usage: Usage /xm chown onlineplayer|/xm chown offlineplayer offlineplayer
+      usage: Usage /XM chown <id> <onlineplayer> |/XM chown <id> <offlineplayer> <offlineplayer>
    xm fav:         
       description: Displays a list of favorite radios, admin list 
-      permission: amchat.radio.fixed.favorite
-      usage: Usage /xm <#|fav|fav add <id>|fav del <id>
-      
+      permission: amchat.radio.fixed.fav
+      usage: Usage /xm fav|fav add <id>|fav del <id>
+   xm info:         
+      description: Displays information about a specific radio tower 
+      permission: amchat.radio.fixed.info
+      usage: Usage /xm info <id>
+
 permissions:
   amchat.*:
     description: Gives access to all am chat commands
@@ -87,6 +91,8 @@ permissions:
       amchat.radio.override.cutoff: true
       amchat.radio.override.set: true
       amchat.radio.override.admin: true
+      amchat.radio.override.link: true
+      amchat.radio.override.info: true      
       amchat.radio.personal.radio: true
       amchat.radio.personal.mic: true
       amchat.radio.personal.filter: true
@@ -97,11 +103,11 @@ permissions:
       amchat.radio.personal.ping: true
       amchat.radio.fixed.create: true
       amchat.radio.fixed.use: true
-      amchat.radio.fixed.list: true
       amchat.radio.fixed.link: true
       amchat.radio.fixed.set: true
       amchat.radio.fixed.chown: true   
-      amchat.radio.fixed.favorite: true      
+      amchat.radio.fixed.fav: true  
+      amchat.radio.fixed.info: true    
   amchat.radio.personal.*:
     description: Gives access to all radio commands
     children:
@@ -122,7 +128,8 @@ permissions:
       amchat.radio.fixed.link: true
       amchat.radio.fixed.set: true
       amchat.radio.fixed.chown: true
-      amchat.radio.fixed.favorite: true
+      amchat.radio.fixed.fav: true
+      amchat.radio.fixed.info: true
   amchat.radio.override.*:
     description: Gives access to all override commands
     children:
@@ -131,6 +138,8 @@ permissions:
       amchat.radio.override.cutoff: true
       amchat.radio.override.set: true
       amchat.radio.override.admin: true
+      amchat.radio.override.link: true
+      amchat.radio.override.info: true
   amchat.radio.list.*:
     description: Gives access both list commands
     children:

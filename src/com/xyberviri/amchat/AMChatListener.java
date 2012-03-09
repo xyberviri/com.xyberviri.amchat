@@ -49,6 +49,7 @@ public class AMChatListener implements Listener {
     public void onPlayerLogout(PlayerQuitEvent event){
     		Player player = event.getPlayer();
     		amcMain.savePlayerRadioSettings(player);
+    		amcMain.amcRadMan.unlinkPlayerFromRadio(player, amcMain.getPlayerLinkID(player),false);
     }
 
 	public boolean isLoaded(AMChat amcMainPlugin) {
