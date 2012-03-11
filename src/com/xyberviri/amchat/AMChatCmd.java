@@ -236,8 +236,10 @@ public class AMChatCmd implements CommandExecutor {
 					}
 					amcMain.amcTools.msgToPlayer(player,">",varHandleList);
 				}	
-				amcMain.amcTools.msgToPlayer(player,"Fav Radios:"," "+varRadios.size());
+				
 				varRadios=amcMain.getFavRadios(player);
+				amcMain.amcTools.msgToPlayer(player,"Fav Radios:"," "+varRadios.size());
+				
 				if(varRadios.isEmpty()){
 					amcMain.amcTools.msgToPlayer(player,"none");
 				} else {
@@ -426,6 +428,7 @@ public class AMChatCmd implements CommandExecutor {
 										amcMain.amcTools.errorToPlayer(player,"Valid Frequencies are "+amcMain.varRadioMinFreq+"-"+amcMain.varRadioMaxFreq);
 										return true;
 									}
+									amcMain.amcTools.msgToPlayer(player, "Frequency for ["+linkID+"] set to",""+targetValue);
 									amcMain.amcRadMan.getRadio(linkID).setChan(targetValue);
 								} catch (NumberFormatException e){
 									amcMain.amcTools.errorToPlayer(player,args[2] + "is not a number!");
@@ -440,6 +443,7 @@ public class AMChatCmd implements CommandExecutor {
 										amcMain.amcTools.errorToPlayer(player,"Valid Code range is "+amcMain.varRadioMinCode+"-"+amcMain.varRadioMaxCode);
 										return true;					
 									}
+									amcMain.amcTools.msgToPlayer(player, "Encrypt Code for ["+linkID+"] set to",""+targetValue);
 									amcMain.amcRadMan.getRadio(linkID).setCode(targetValue);
 								} catch (NumberFormatException e){
 									amcMain.amcTools.errorToPlayer(player,args[2] + "is not a number!");
