@@ -22,6 +22,7 @@ public class AMChatListener implements Listener {
 	
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
+    	if(event.isCancelled()){return;}
         Block block = event.getBlock();
         if (block.getType() == Material.JUKEBOX && (event.getPlayer().isSneaking()) && event.getPlayer().hasPermission("amchat.radio.fixed.create")){
         	if(block.getY() >= block.getWorld().getSeaLevel()){
