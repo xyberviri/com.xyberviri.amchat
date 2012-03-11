@@ -4,9 +4,9 @@ radio-format: '§2[§6%FREQ.%CODE§7%SUFFIX§2]§e%SENDER§f: %MESSAGE'
 # this is the radio suffix for messages
 radio-suffix: rHz
 # distance chat can reach if limited
-chat-distance: 64.0
+chat-distance: 32.0
 # distance a personal radio can reach if limited
-radio-distance: 160.0
+radio-distance: 96.0
 #should we limit local chat?
 chat-limited: true
 #should we limit radio chat?
@@ -41,3 +41,5 @@ antenna-user-mod-gold: 3
 antenna-user-mod-diamond: 7
 #what is the tick rate to use when scheduling the radio self checks
 antenna-tick-rate: 20
+#how many miliseconds before we save the radio info to file.
+save-interval: 600000

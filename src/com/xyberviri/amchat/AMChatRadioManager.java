@@ -23,7 +23,7 @@ public class AMChatRadioManager {
 	private Map <String, AMChatRadio> 	amRadioHandles;		//Handles to Radios
 	private	Map <String, ArrayList<String>>  ownerTowers = new HashMap<String,ArrayList<String>>(); // These are handled here since AMChat is more for portable radio. 
 	private XYCustomConfig radioConfig;
-	
+	private long varLastSave;
 	
 	
 	AMChatRadioManager(AMChat amchat){
@@ -31,6 +31,7 @@ public class AMChatRadioManager {
 		this.amRadioList = new ArrayList<AMChatRadio>();
 		this.amRadioHandles = new HashMap<String, AMChatRadio>();
 		this.radioConfig = new XYCustomConfig(amcMain,"rm.settings.yml");
+		this.varLastSave = System.currentTimeMillis();
 		loadRadioSettings();
 	}
 	
@@ -47,6 +48,17 @@ public class AMChatRadioManager {
 					deleteRadio(amcRadio);
 				}
 			}
+			autoSave();
+		}
+	}
+	
+	public void autoSave(){
+		if (!amRadioList.isEmpty()){			
+			long currentTime = System.currentTimeMillis();
+			if (varLastSave+amcMain.varScheduleSaveRate<currentTime){
+				amcMain.logMessage("Auto-Saving Fixed Radio information.");
+				this.varLastSave = currentTime;
+			}	
 		}
 	}
 	
@@ -169,18 +181,16 @@ public class AMChatRadioManager {
 		newRadio.setCode(amcMain.getPlayerRadioCode(player));		
 		newRadio.addMember(player.getDisplayName());
 		newRadio.addAdmin(player.getDisplayName());
-		newRadio.linkPlayer(player);
 		varNewPass=""+varNewRadioHandle.hashCode();
 		newRadio.setPass(varNewPass);
 		this.amRadioList.add(newRadio);
-		this.amRadioHandles.put(varNewRadioHandle, newRadio);
-		
-		
-		amcMain.setPlayerLinkID(player, varNewRadioHandle);
+		this.amRadioHandles.put(varNewRadioHandle, newRadio);	
 		addOwnerRadio(player.getDisplayName(),varNewRadioHandle);
-		player.setCompassTarget(radioLocation);
+		//newRadio.linkPlayer(player);
+		//amcMain.setPlayerLinkID(player, varNewRadioHandle);
+		//player.setCompassTarget(radioLocation);		
 		
-		
+		linkPlayerToRadio(player, varNewRadioHandle);	
 		amcMain.amcTools.msgToPlayer(player, "You have created a new Radio.");
 		amcMain.amcTools.msgToPlayer(player, "MCC-ID: ",varNewRadioHandle);
 		amcMain.amcTools.msgToPlayer(player, "PASSWD: ",varNewPass);
@@ -296,6 +306,7 @@ public class AMChatRadioManager {
 					amcMain.tunePlayerRadioChannel(player,targetRadio.getChan());
 					amcMain.setPlayerRadioCode(player, targetRadio.getCode());
 					player.setCompassTarget(targetRadio.getLoc());
+					
 					amcMain.amcTools.msgToPlayer(player, "A link has successfully been established to ",linkID);
 					return true;
 				} else {amcMain.amcTools.errorToPlayer(player, "Sorry, you are unable to link to that radio because it is at max capacity.");}

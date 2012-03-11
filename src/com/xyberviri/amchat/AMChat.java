@@ -38,11 +38,11 @@ public class AMChat extends JavaPlugin {
 	String varRadioFreqSuffix = "rHz"; 		// frequency string name
 	
 	//these are double because we calculate the distance versus this, and that variable is a double
-	double varPlayerMaxChatDist = 64;		// The Maximum Distance local chat will reach.
-	double varRadioMaxChatDist = 160;		// The Maximum Distance Radio chat will reach.
+	double varPlayerMaxChatDist = 32;		// The Maximum Distance local chat will reach.
+	double varRadioMaxChatDist = 96;		// The Maximum Distance Radio chat will reach.
 	
 	boolean varLimitPlayerChat = true;	// Should we limit the distance that non radio chat can reach?
-	boolean varLimitRadioChat = false;	// Should we limit the distance that a personal communicator can reach?
+	boolean varLimitRadioChat = true;	// Should we limit the distance that a personal communicator can reach?
 	
 	double varRadioSkyWaveMod = 2;		// This distance to modify the chat distance for radios at night.
 	boolean varSkyWaveEnabled = false;	// Is SkyWave Effect enabled?
@@ -56,6 +56,7 @@ public class AMChat extends JavaPlugin {
 	int varRadioMaxCode = 999;			// max value encryption key we will use for transmission.
 
 	int varScheduleTickRate=20;			//This is the value for the tick rate used by the scheduler
+	long varScheduleSaveRate=600000;	//this is how many milliseconds we should wait before we save the active radios.
 	
 	int varHeldItemID = 345;			// the held item that is our radio
 	boolean varHeldItemReq = false;		// is the held item needed so we can use our radio.
@@ -131,6 +132,7 @@ public class AMChat extends JavaPlugin {
 		this.varFixedRadioUserModG = amcConfig.getInt("antenna-user-mod-gold",varFixedRadioUserModG);
 		this.varFixedRadioUserModD = amcConfig.getInt("antenna-user-mod-diamond",varFixedRadioUserModD);
 		this.varScheduleTickRate = amcConfig.getInt("antenna-tick-rate",varScheduleTickRate);
+		this.varScheduleSaveRate = amcConfig.getLong("save-interval",varScheduleSaveRate);
 	}
 	
 	public void saveSettings(){
@@ -156,6 +158,7 @@ public class AMChat extends JavaPlugin {
 		amcConfig.set("antenna-user-mod-gold",varFixedRadioUserModG);
 		amcConfig.set("antenna-user-mod-diamond",varFixedRadioUserModD);
 		amcConfig.set("antenna-tick-rate",varScheduleTickRate);
+		amcConfig.set("save-interval",varScheduleSaveRate);
 		this.saveConfig();
 	}
 	

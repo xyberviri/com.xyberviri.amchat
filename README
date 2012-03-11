@@ -57,6 +57,11 @@ Add Features for Nether such as 8x multiplyer.
 Add Skywave Feature for Day/Night Cycle. 
 
 CHANGE LOG
+Version 0.2.1
+Fixed issue with Link not dropping from old tower when linking to a new tower upon creation.
+Changed Default local chat distance to 32 from 64
+Changed Default personal radio chat distance to 96 from 160
+
 Version 0.2
 Added /OPs are able to hear all local chat.
 Added /OPs are able to receive all chat regardless of range
