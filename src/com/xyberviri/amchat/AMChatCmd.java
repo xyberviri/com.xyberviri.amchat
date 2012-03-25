@@ -507,6 +507,10 @@ public class AMChatCmd implements CommandExecutor {
 						}
 					} else {
 						varMsg=varLinkID+" was not a valid link id";
+						if(amcMain.isFavRadio(player,varLinkID)){
+							varMsg="Deleted: "+varLinkID;
+							amcMain.delFavRadio(player, varLinkID);
+						} 
 					}
 					amcMain.amcTools.msgToPlayer(player,varMsg);
 				}
@@ -551,6 +555,10 @@ public class AMChatCmd implements CommandExecutor {
 						}						
 					}else{
 						amcMain.amcTools.errorToPlayer(player,"Im sorry but that link id appears to no longer be valid.");
+						if(amcMain.isFavRadio(player,varRadioID)){
+							amcMain.amcTools.msgToPlayer(player, "Deleted: ",varRadioID);
+							amcMain.delFavRadio(player, varRadioID);
+						} 
 					}					
 				}
 				
