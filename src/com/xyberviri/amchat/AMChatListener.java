@@ -9,7 +9,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class AMChatListener implements Listener {
@@ -24,6 +24,7 @@ public class AMChatListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent event) {
     	if(event.isCancelled()){return;}
         Block block = event.getBlock();
+        //amcMain.logMessage(event.getPlayer().getDisplayName()+" placed "+block.getType());
         if (block.getType() == Material.JUKEBOX && (event.getPlayer().isSneaking()) && event.getPlayer().hasPermission("amchat.radio.fixed.create")){
         	if(block.getY() >= block.getWorld().getSeaLevel()){
         		amcMain.amcRadMan.createNewRadio(event.getPlayer(), block.getLocation());
@@ -41,7 +42,7 @@ public class AMChatListener implements Listener {
     }
     
     @EventHandler
-    public void onPlayerLogin(PlayerLoginEvent event){
+    public void onPlayerLogin(PlayerJoinEvent event){
     		Player player = event.getPlayer();
     		this.amcMain.loadPlayerRadioSettings(player);
     }
