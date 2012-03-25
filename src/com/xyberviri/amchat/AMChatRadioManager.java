@@ -56,7 +56,8 @@ public class AMChatRadioManager {
 		if (!amRadioList.isEmpty()){			
 			long currentTime = System.currentTimeMillis();
 			if (varLastSave+amcMain.varScheduleSaveRate<currentTime){
-				amcMain.logMessage("Auto-Saving Fixed Radio information.");
+				//amcMain.logMessage("Auto-Saving Fixed Radio information.");
+				saveRadioSettings();
 				this.varLastSave = currentTime;
 			}	
 		}
@@ -65,7 +66,7 @@ public class AMChatRadioManager {
 	//Save all the Radios to a file
 	public void saveRadioSettings(){
 		if(amRadioList.isEmpty()){
-			amcMain.logMessage("note:no radios have been created, no save file will be created.");
+			amcMain.logMessage("No radios to save.");
 		} else {
 			amcMain.logMessage("Saving radio tower settings.");
 		Map<String, Object> radManSettings = new HashMap<String,Object>();
@@ -156,7 +157,6 @@ public class AMChatRadioManager {
 			//If ever thing was loaded correctly then we add it to the list of radios
 			//Also note by not putting it in this list it wont be saved. 
 			if(b){
-				//newRadio.chkValid();
 			this.amRadioList.add(newRadio);
 			this.amRadioHandles.put((String) radioSettings.get("radio-id"), newRadio);
 			addOwnerRadio((String) radioSettings.get("owner"),(String) radioSettings.get("radio-id"));
