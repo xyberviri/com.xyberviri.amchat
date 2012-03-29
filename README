@@ -57,6 +57,10 @@ Add Features for Nether such as 8x multiplyer.
 Add Skywave Feature for Day/Night Cycle. 
 
 CHANGE LOG
+Version 0.2.2
+Added Autosave code to actually do saving
+Removed Debug code for issue reported on Tekkit servers. 
+
 Version 0.2.1
 Fixed issue with Link not dropping from old tower when linking to a new tower upon creation.
 Changed Default local chat distance to 32 from 64
