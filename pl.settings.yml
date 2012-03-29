@@ -1,0 +1,9 @@
+default:
+  mic: true
+  link: none
+  freq: 64
+  radio: true
+  favorites: []
+  code: 1
+  cutoff: 15
+  filter: false

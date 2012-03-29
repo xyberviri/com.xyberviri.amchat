@@ -1,34 +1,147 @@
 name: AMChat
 author: Xyberviri
 main: com.xyberviri.amchat.AMChat
-version: 0.1
+version: 0.2.2
+description: Radio based communication
 commands:
    am:
       description: display information about your radio
       permission: amchat.radio.personal.use
-      usage: /am
+      usage: type /help am for more information.
    am radio:
       description: toggles your radio on off 
       permission: amchat.radio.personal.radio
-      usage: /am radio
+      usage: Usage /am radio
    am mic:
       description: toggles your mic on off
       permission: amchat.radio.personal.mic
-      usage: /am mic
+      usage: Usage /am mic
    am filter:
       description: toggles your filter on off
       permission: amchat.radio.personal.filter
-      usage: /am filter      
+      usage: Usage /am filter      
    am tune:
       description: Tunes personal radio to a specific channel
       permission: amchat.radio.personal.tune
-      usage: /am tune <#>
+      usage: Usage /am tune #
    am code:
       description: Sets the encryption code before transmission 0 to disable
       permission: amchat.radio.personal.code
-      usage: /am code <#>
+      usage: Usage /am code #
    am cutoff:
       description: adjust your cutoff
       permission: amchat.radio.personal.cutoff
-      usage: /am cutoff <#>
-      
+      usage: Usage /am cutoff #
+   am home:
+      description: Reset your radio to the default
+      permission: amchat.radio.personal.home
+      usage: Usage /am home
+   am ping:
+      description: send your info to another player
+      permission: amchat.radio.personal.ping
+      usage: Usage /am ping <playername>
+   am list:
+      description: lists all of the players online with active radios and what they are set to.
+      permission: amchat.radio.list.personal
+      usage: Usage /am list
+   xm:
+      description: display information about your fixed radio towers
+      permission: amchat.radio.fixed.use
+      usage: Usage /xm
+   xm list:
+      description: lists all of the radios on the server with all information.
+      permission: amchat.radio.list.fixed
+      usage: Usage /xm list
+   xm link:
+      description: link to a fixed radio tower, a password is required in most cases.
+      permission: amchat.radio.fixed.link
+      usage: Usage /xm <id> <password>
+   xm unlink:
+      description: unlinks from a radio tower
+      permission: amchat.radio.fixed.link
+      usage: Usage /xm unlink
+   xm set:
+      description: set options for fixed radio, make sure your linked first
+      permission: amchat.radio.fixed.set
+      usage: Usage /xm set <freq|code|pass|admin> <value>
+   xm chown:
+      description: change the owner of a tower you own to another player, if the player is offline their name has to be entered twice.
+      permission: amchat.radio.fixed.chown
+      usage: Usage /XM chown <id> <onlineplayer> |/XM chown <id> <offlineplayer> <offlineplayer>
+   xm fav:         
+      description: Displays a list of favorite radios, admin list 
+      permission: amchat.radio.fixed.fav
+      usage: Usage /xm fav|fav add <id>|fav del <id>
+   xm info:         
+      description: Displays information about a specific radio tower 
+      permission: amchat.radio.fixed.info
+      usage: Usage /xm info <id>
+
+permissions:
+  amchat.*:
+    description: Gives access to all am chat commands
+    children:
+      amchat.local.hearall: true
+      amchat.radio.list.personal: true
+      amchat.radio.list.fixed: true
+      amchat.radio.hearall: true
+      amchat.radio.readall: true
+      amchat.radio.override.tune: true
+      amchat.radio.override.code: true
+      amchat.radio.override.cutoff: true
+      amchat.radio.override.set: true
+      amchat.radio.override.admin: true
+      amchat.radio.override.link: true
+      amchat.radio.override.info: true      
+      amchat.radio.personal.radio: true
+      amchat.radio.personal.mic: true
+      amchat.radio.personal.filter: true
+      amchat.radio.personal.tune: true
+      amchat.radio.personal.code: true
+      amchat.radio.personal.cutoff: true
+      amchat.radio.personal.home: true
+      amchat.radio.personal.ping: true
+      amchat.radio.fixed.create: true
+      amchat.radio.fixed.use: true
+      amchat.radio.fixed.link: true
+      amchat.radio.fixed.set: true
+      amchat.radio.fixed.chown: true   
+      amchat.radio.fixed.fav: true  
+      amchat.radio.fixed.info: true    
+  amchat.radio.personal.*:
+    description: Gives access to all radio commands
+    children:
+      amchat.radio.personal.use: true
+      amchat.radio.personal.radio: true
+      amchat.radio.personal.mic: true
+      amchat.radio.personal.filter: true
+      amchat.radio.personal.tune: true
+      amchat.radio.personal.code: true
+      amchat.radio.personal.cutoff: true
+      amchat.radio.personal.home: true
+      amchat.radio.personal.ping: true
+  amchat.radio.fixed.*:
+    description: Gives access to all fixed radio commands
+    children:
+      amchat.radio.fixed.create: true
+      amchat.radio.fixed.use: true
+      amchat.radio.fixed.link: true
+      amchat.radio.fixed.set: true
+      amchat.radio.fixed.chown: true
+      amchat.radio.fixed.fav: true
+      amchat.radio.fixed.info: true
+  amchat.radio.override.*:
+    description: Gives access to all override commands
+    children:
+      amchat.radio.override.tune: true
+      amchat.radio.override.code: true
+      amchat.radio.override.cutoff: true
+      amchat.radio.override.set: true
+      amchat.radio.override.admin: true
+      amchat.radio.override.link: true
+      amchat.radio.override.info: true
+  amchat.radio.list.*:
+    description: Gives access both list commands
+    children:
+      amchat.radio.list.personal: true
+      amchat.radio.list.fixed: true 

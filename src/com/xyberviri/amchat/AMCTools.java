@@ -8,20 +8,23 @@ import org.bukkit.entity.Player;
 
 public class AMCTools {
 	AMChat amcMain;
-	private boolean amcToolsLoaded = false;
+	
+
+
 	
 	public AMCTools(AMChat amChat){
 		this.amcMain = amChat;
-		this.amcToolsLoaded = true;
 	}
+	
+
+	
 	
 	public double getDistance(Location location1,Location location2){
 		// This only accepts location objects. 
-		double distanceBetween = 0;
-		// They aren't in the same world, the distance is zero
-		if (!(location1.getWorld() == location2.getWorld())){
-			return distanceBetween;
-		}
+		double distanceBetween;
+
+		// if (!(location1.getWorld() == location2.getWorld())){return -1.0f;}
+		
 		double x1 = location1.getX() + 0.01;
 		double x2 = location2.getX() + 0.01;
 		double y1 = location1.getY() + 0.01;
@@ -31,6 +34,7 @@ public class AMCTools {
 		distanceBetween = Math.sqrt(((x2-x1)*(x2-x1))+((y2-y1)*(y2-y1))+((z2-z1)*(z2-z1)));
 		return distanceBetween;
 	}
+	
 	
 	//Converts double to float and performs inverse square calculation. 
 	//Divide the return by 1 to get the distance.
@@ -69,6 +73,7 @@ public class AMCTools {
 			amcMain.amcLogger.info(message);
 		}
 	}	
+
 	
 	//Formatter for Radio chat by broadcasting player
 	public String createMessage(Player player,String message){
@@ -111,5 +116,11 @@ public class AMCTools {
 	    return builder.toString();
 	}	
 	
-	public boolean isLoaded(){return amcToolsLoaded;}
+	//returns true if we are loaded from the main plugin. 
+	public boolean isLoaded(AMChat amcMainPlugin) {
+		if (this.amcMain.equals(amcMainPlugin)){
+			return true;
+			}
+		return false;
+	}
 }

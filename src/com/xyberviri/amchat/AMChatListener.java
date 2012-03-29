@@ -1,53 +1,73 @@
 package com.xyberviri.amchat;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerChatEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class AMChatListener implements Listener {
-	//this is a listener server, all of the listener
+	//this is a listener server, all of the listeners
 	AMChat amcMain;
-	private boolean amcListenerLoaded = false;
 	
 	public AMChatListener (AMChat amchat){
 		this.amcMain = amchat;
-		this.amcListenerLoaded = true;
 	}
 	
     @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event) {
+    	if(event.isCancelled()){return;}
+        Block block = event.getBlock();
+        //amcMain.logMessage(event.getPlayer().getDisplayName()+" placed "+block.getType());
+        if (block.getType() == Material.JUKEBOX && (event.getPlayer().isSneaking()) && event.getPlayer().hasPermission("amchat.radio.fixed.create")){
+        	if(block.getY() >= block.getWorld().getSeaLevel()){
+        		amcMain.amcRadMan.createNewRadio(event.getPlayer(), block.getLocation());
+        	} else {
+        		amcMain.amcTools.errorToPlayer(event.getPlayer(), "Unable to place a radio this low, you have to be at least at sea level.");
+        	}
+        	     	
+        }        		
+    }    		
+	
+    @EventHandler
     public void onPlayerChat(PlayerChatEvent event) {
-    	if(this.amcListenerLoaded){
     		event.setCancelled(true);
     		this.amcMain.amcRouter.AMChatEvent(event);
-    		
-    	} else {
-    		this.amcMain.logError("chat event sent to unlinked listener!");
-    	}
     }
     
     @EventHandler
-    public void onPlayerLogin(PlayerLoginEvent event){
-    	if(this.amcListenerLoaded){
+    public void onPlayerLogin(PlayerJoinEvent event){
     		Player player = event.getPlayer();
-    		this.amcMain.initPlayerRadio(player);
-    	} else {
-    		this.amcMain.logError("login event sent to unlinked listener!");
-    	}
+    		this.amcMain.loadPlayerRadioSettings(player);
     }
 
     @EventHandler
     public void onPlayerLogout(PlayerQuitEvent event){
-    	
-    	if(this.amcListenerLoaded){
-    		//Player player = event.getPlayer();
-    		//this.amcMain.initPlayerRadio(player);
-    	} else {
-    		this.amcMain.logError("logout event sent to unlinked listener!");
-    	}
+    		Player player = event.getPlayer();
+    		amcMain.savePlayerRadioSettings(player);
+    		amcMain.amcRadMan.unlinkPlayerFromRadio(player, amcMain.getPlayerLinkID(player),false);
     }
 
-	// return true if we were successfully loaded
-    public boolean isLoaded(){return this.amcListenerLoaded;}
+	public boolean isLoaded(AMChat amcMainPlugin) {
+		if (this.amcMain.equals(amcMainPlugin)){return true;}
+		return false;
+	}
+	
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerInteract(PlayerInteractEvent event) {
+    	if(event.getPlayer().getItemInHand().getTypeId() == amcMain.varHeldItemID){
+    		if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
+    			amcMain.scanPlayerRadioChannel(event.getPlayer(), true);
+    		} else {
+    			amcMain.scanPlayerRadioChannel(event.getPlayer(), false);
+    		}
+    	}
+    	
+    }
 }
