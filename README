@@ -1,1 +1,5 @@
-AMChat Changes the way players communicate in Minecraft so that there is a physical elemet involed. 
+AM Chat offers an exciting low tech take on "chat frequencies", instead of "General" players can use frequencies to transmit there conversations.
+Just like a radio that frequency can be change, you can also encode that chat so only players with that same code on the same frequency can read your text.
+Local Chat can also be restricted, by default this is set to 64 blocks. A filter can be set so only legible text can be received.
+
+You can optionally limit the distance of radio chat as well.
