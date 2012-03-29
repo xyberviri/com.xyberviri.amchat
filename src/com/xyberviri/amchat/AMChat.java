@@ -34,7 +34,8 @@ public class AMChat extends JavaPlugin {
 	
 	// Settings
 	String varMsgFormat = ChatColor.DARK_GREEN+"["+ChatColor.GOLD+"%FREQ.%CODE"+ChatColor.GRAY+"%SUFFIX"+ChatColor.DARK_GREEN+"]"+ChatColor.YELLOW+"%SENDER"+ChatColor.WHITE+": %MESSAGE";
-	//String varBCsatMsgFormat = ChatColor.DARK_GREEN+"["+ChatColor.GOLD+"%LINKID"+ChatColor.DARK_GREEN+"]"+ChatColor.YELLOW+"%SENDER"+ChatColor.WHITE+": %MESSAGE";
+	String varBCsatMsgFormat = ChatColor.DARK_GREEN+"["+ChatColor.GOLD+"%LINKID"+ChatColor.DARK_GREEN+"]"+ChatColor.YELLOW+"%SENDER"+ChatColor.WHITE+": %MESSAGE";
+	
 	String varRadioFreqSuffix = "rHz"; 		// frequency string name
 	
 	//these are double because we calculate the distance versus this, and that variable is a double
@@ -111,6 +112,7 @@ public class AMChat extends JavaPlugin {
 	
 	public void loadSettings(){
 		this.varMsgFormat = amcConfig.getString("radio-format", varMsgFormat);
+		this.varBCsatMsgFormat = amcConfig.getString("broadcast-format", varBCsatMsgFormat);		
 		this.varRadioFreqSuffix = amcConfig.getString("radio-suffix",varRadioFreqSuffix);
 		this.varPlayerMaxChatDist = amcConfig.getDouble("chat-distance",varPlayerMaxChatDist);
 		this.varRadioMaxChatDist = amcConfig.getDouble("radio-distance", varRadioMaxChatDist);
@@ -126,8 +128,7 @@ public class AMChat extends JavaPlugin {
 		this.varRadioAutoOn = amcConfig.getBoolean("radio-auto-on", varRadioAutoOn);
 		this.varHeldItemID = amcConfig.getInt("radio-item-id",varHeldItemID);
 		this.varHeldItemReq = amcConfig.getBoolean("radio-item-required", varHeldItemReq);
-		this.varFixedRadioRangeMod=amcConfig.getDouble("antenna-range-mod", varFixedRadioRangeMod);
-		
+		this.varFixedRadioRangeMod=amcConfig.getDouble("antenna-range-mod", varFixedRadioRangeMod);		
 		this.varFixedRadioUserModI = amcConfig.getInt("antenna-user-mod-iron",varFixedRadioUserModI);
 		this.varFixedRadioUserModG = amcConfig.getInt("antenna-user-mod-gold",varFixedRadioUserModG);
 		this.varFixedRadioUserModD = amcConfig.getInt("antenna-user-mod-diamond",varFixedRadioUserModD);
@@ -137,7 +138,7 @@ public class AMChat extends JavaPlugin {
 	
 	public void saveSettings(){
 		amcConfig.set("radio-format", varMsgFormat);
-		//amcConfig.set("broadcast-format", varBCsatMsgFormat);
+		amcConfig.set("broadcast-format", varBCsatMsgFormat);
 		amcConfig.set("radio-suffix",varRadioFreqSuffix);
 		amcConfig.set("chat-distance",varPlayerMaxChatDist);
 		amcConfig.set("radio-distance", varRadioMaxChatDist);
