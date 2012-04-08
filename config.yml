@@ -1,45 +1,24 @@
-# default config.yml
-# this is the format radio chat uses
-radio-format: '§2[§6%FREQ.%CODE§7%SUFFIX§2]§e%SENDER§f: %MESSAGE'
-# this is the radio suffix for messages
+# config.yml
+radio-format: '&3[&4%FREQ.%CODE&f%SUFFIX&a]&e%SENDER&7: %MESSAGE'
+broadcast-format: '&2[&6%LINKID&2]&e%SENDER&f: %MESSAGE'
 radio-suffix: rHz
-# distance chat can reach if limited
 chat-distance: 32.0
-# distance a personal radio can reach if limited
 radio-distance: 96.0
-#should we limit local chat?
 chat-limited: true
-#should we limit radio chat?
 radio-limited: true
-#is Skywave in effect?
 enable-skywave: false
-#how far do we modify the distance of radio chat when sky wave is in effect.
 skywave-mod: 2.0
-#what is the lowest frequency we can set our radio's to?
 radio-min: 32
-#what is the highest frequency we can set our radio's to?
 radio-max: 512
-#what is the maximum cutoff for receiving messages?
 radio-cutoff-max: 15
-#what is the max code value for encrypting messages?
 radio-code-max: 999
-#what is the default channel for the server?
 radio-default-channel: 64
-#when some one joins the server and they don't have any saved settings should we turn on their radio by default?
 radio-auto-on: true
-#What item do you want to be held as your radio, default compass
 radio-item-id: 345
-#Do we need to be holding the radio item in order to use /xm commands
 radio-item-required: false
-#For each antenna block how much do we add to the radio's range
 antenna-range-mod: 10.0
-#how many users do we add for each iron block
 antenna-user-mod-iron: 1
-#how many users do we add for each gold block
 antenna-user-mod-gold: 3
-#how many users do we add for each diamond block
 antenna-user-mod-diamond: 7
-#what is the tick rate to use when scheduling the radio self checks
 antenna-tick-rate: 20
-#how many miliseconds before we save the radio info to file.
 save-interval: 600000
