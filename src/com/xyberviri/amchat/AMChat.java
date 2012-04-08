@@ -111,8 +111,8 @@ public class AMChat extends JavaPlugin {
 	}
 	
 	public void loadSettings(){
-		this.varMsgFormat = amcConfig.getString("radio-format", varMsgFormat);
-		this.varBCsatMsgFormat = amcConfig.getString("broadcast-format", varBCsatMsgFormat);		
+		this.varMsgFormat = amcTools.formatLoadFix(amcConfig.getString("radio-format", varMsgFormat));
+		this.varBCsatMsgFormat = amcTools.formatLoadFix(amcConfig.getString("broadcast-format", varBCsatMsgFormat));		
 		this.varRadioFreqSuffix = amcConfig.getString("radio-suffix",varRadioFreqSuffix);
 		this.varPlayerMaxChatDist = amcConfig.getDouble("chat-distance",varPlayerMaxChatDist);
 		this.varRadioMaxChatDist = amcConfig.getDouble("radio-distance", varRadioMaxChatDist);
@@ -137,8 +137,8 @@ public class AMChat extends JavaPlugin {
 	}
 	
 	public void saveSettings(){
-		amcConfig.set("radio-format", varMsgFormat);
-		amcConfig.set("broadcast-format", varBCsatMsgFormat);
+		amcConfig.set("radio-format", amcTools.formatSaveFix(varMsgFormat));
+		amcConfig.set("broadcast-format", amcTools.formatSaveFix(varBCsatMsgFormat));
 		amcConfig.set("radio-suffix",varRadioFreqSuffix);
 		amcConfig.set("chat-distance",varPlayerMaxChatDist);
 		amcConfig.set("radio-distance", varRadioMaxChatDist);
