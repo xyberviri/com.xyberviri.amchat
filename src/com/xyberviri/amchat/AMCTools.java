@@ -116,6 +116,18 @@ public class AMCTools {
 	    return builder.toString();
 	}	
 	
+	public String formatSaveFix(String string){
+		string = string.replaceAll("\u00A7([0-9a-f])", "&$1");
+		return string;
+	}
+	public String formatLoadFix(String string){
+		string = string.replaceAll("&([0-9a-f])", "\u00a7$1");
+		return string;
+	}
+	
+
+	
+	
 	//returns true if we are loaded from the main plugin. 
 	public boolean isLoaded(AMChat amcMainPlugin) {
 		if (this.amcMain.equals(amcMainPlugin)){
