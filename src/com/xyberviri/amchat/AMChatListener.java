@@ -13,6 +13,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.xyberviri.amchat.events.AMChatEvent;
+import com.xyberviri.amchat.events.AMEventCenter;
+
 
 public class AMChatListener implements Listener {
 	//this is a listener server, all of the listeners
@@ -78,8 +80,9 @@ public class AMChatListener implements Listener {
 		
 		//If this is our event then cancel the original chat event 
 		if (isOurs){
-			AMChatEvent newAmChatEvent = new AMChatEvent (sender, event.getMessage(),isRadio,amcMain.getPlayerRadioChannel(sender),amcMain.getPlayerRadioCode(sender));
-			amcMain.getServer().getPluginManager().callEvent(newAmChatEvent);
+//			AMChatEvent newAmChatEvent = new AMChatEvent (sender, event.getMessage(),isRadio,amcMain.getPlayerRadioChannel(sender),amcMain.getPlayerRadioCode(sender));
+//			amcMain.getServer().getPluginManager().callEvent(newAmChatEvent);
+			AMEventCenter.callAmChatEvent(sender, event.getMessage(),isRadio,amcMain.getPlayerRadioChannel(sender),amcMain.getPlayerRadioCode(sender));
 			event.setCancelled(true);
 			} else {
 				//This isn't an AMChat event

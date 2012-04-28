@@ -12,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
+import com.xyberviri.amchat.events.AMEventCenter;
 import com.xyberviri.util.XYCustomConfig;
 
 
@@ -160,6 +161,7 @@ public class AMChatRadioManager {
 			this.amRadioList.add(newRadio);
 			this.amRadioHandles.put((String) radioSettings.get("radio-id"), newRadio);
 			addOwnerRadio((String) radioSettings.get("owner"),(String) radioSettings.get("radio-id"));
+			AMEventCenter.callAMChatRadioLoadEvent(newRadio);
 			}
 		} 
 		else{b=false;}
@@ -196,6 +198,7 @@ public class AMChatRadioManager {
 		amcMain.amcTools.msgToPlayer(player, "PASSWD: ",varNewPass);
 		amcMain.logMessage(player.getDisplayName()+" created a new radio");
 		amcMain.logMessage("id:"+varNewRadioHandle+" default passwd:"+varNewPass);
+		AMEventCenter.callAMChatRadioCreateEvent(player, newRadio);
 	}
 	
 	public void deleteRadio(AMChatRadio delThisRadio){
@@ -308,6 +311,7 @@ public class AMChatRadioManager {
 					player.setCompassTarget(targetRadio.getLoc());
 					
 					amcMain.amcTools.msgToPlayer(player, "A link has successfully been established to ",linkID);
+					AMEventCenter.callAMChatRadioJoinEvent(player, targetRadio);
 					return true;
 				} else {amcMain.amcTools.errorToPlayer(player, "Sorry, you are unable to link to that radio because it is at max capacity.");}
 			} else {

@@ -711,7 +711,7 @@ public class AMChat extends JavaPlugin {
 		
 	}
 	
-	public static AMChat getHandle(){
+	public static AMChat getAMChatHandle(){
 		return amcChatMain;
 	}
 	
