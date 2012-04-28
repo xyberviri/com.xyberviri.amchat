@@ -20,7 +20,9 @@ public class AMChatListener implements Listener {
 		this.amcMain = amchat;
 	}
 	
-    @EventHandler
+	
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent event) {
     	if(event.isCancelled()){return;}
         Block block = event.getBlock();
@@ -29,20 +31,68 @@ public class AMChatListener implements Listener {
         	if(block.getY() >= block.getWorld().getSeaLevel()){
         		amcMain.amcRadMan.createNewRadio(event.getPlayer(), block.getLocation());
         	} else {
+        		event.setCancelled(true);
         		amcMain.amcTools.errorToPlayer(event.getPlayer(), "Unable to place a radio this low, you have to be at least at sea level.");
         	}
         	     	
         }        		
     }    		
 	
-    @EventHandler
-    public void onPlayerChat(PlayerChatEvent event) {
-    		event.setCancelled(true);
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPlayerChat(PlayerChatEvent event){
+		if(event.isCancelled()) return;	
+		Player sender = event.getPlayer();
+		boolean isRadio, isOurs = false; //is this a XCast, Does this even belong to AMChat.
+		
+		//Decide if this is a our chat event.		
+		if(amcMain.isRadioOn(sender)&&amcMain.getPlayerMic(sender)){
+			//Radio on and Mic open, send via radio
+			isOurs = true;
+			isRadio = true;
+						
+			if(amcMain.varHeldItemReq){
+				//Additional checks if we "need to have a radio" 
+				if(sender.getItemInHand().getTypeId() == amcMain.varHeldItemID ||sender.getInventory().contains(amcMain.varHeldItemID)){
+					//I'm either holding a radio or have one in my inventory.
+				} else if (amcMain.isLocalManaged()){
+					//This is local chat and this plugin is managing local chat also.
+					isRadio = false;
+				} else {
+					//Local chat and this plugin doesn't handle local chat.
+					isRadio = false;
+					isOurs = false;
+				}				
+			}//End Checks for Held requirement. 
+			
+		} else if (amcMain.isLocalManaged()){
+			//No active open mic or active radio, Its ours if AMChat takes care of local
+			isOurs = true;
+			isRadio = false;			
+		} else {
+			//Local chat and this plugin doesn't handle local chat.
+			isRadio = false;
+			isOurs = false;
+		}
+		
+		//If this is our event then cancel the original chat event 
+		if (isOurs){
+			AMChatEvent newAmChatEvent = new AMChatEvent (sender, event.getMessage(),isRadio,amcMain.getPlayerRadioChannel(sender),amcMain.getPlayerRadioCode(sender));
+			amcMain.getServer().getPluginManager().callEvent(newAmChatEvent);
+			event.setCancelled(true);
+			} else {
+				//This isn't an AMChat event
+			}	
+	}
+	
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+    public void onAMChat(AMChatEvent event) {
+		if(event.isCancelled()) return;
     		this.amcMain.amcRouter.AMChatEvent(event);
     }
     
-    @EventHandler
-    public void onPlayerLogin(PlayerJoinEvent event){
+	@EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerLogin(PlayerJoinEvent event){    	
     		Player player = event.getPlayer();
     		this.amcMain.loadPlayerRadioSettings(player);
     }
