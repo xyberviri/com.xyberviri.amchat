@@ -12,6 +12,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import com.xyberviri.amchat.events.AMChatEvent;
+
 public class AMChatListener implements Listener {
 	//this is a listener server, all of the listeners
 	AMChat amcMain;

@@ -4,7 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerChatEvent;
+
+import com.xyberviri.amchat.events.AMChatEvent;
 
 public class AMChatRouter {
 	AMChat amcMain;
@@ -13,12 +14,12 @@ public class AMChatRouter {
 		this.amcMain = amChat;
 	}	
 	
-	public void AMChatEvent(PlayerChatEvent event) {
+	public void AMChatEvent(AMChatEvent event) {
 		Player sender = event.getPlayer();
-		String message = event.getMessage();
-		amcMain.amcLogger.info(sender.getDisplayName()+": "+message);		
-		// If were dealing with radio chat its going here.
-		if(amcMain.isRadioOn(sender)&&amcMain.getPlayerMic(sender)){
+		String message = event.getMessage();	
+		
+		if (event.isRadioChat()){
+			amcMain.amcLogger.info(sender.getDisplayName()+": "+message);
 			message = amcMain.amcTools.createMessage(sender, message);
 			
 			if (amcMain.getPlayerLinkID(sender).equalsIgnoreCase("none")){
@@ -30,12 +31,11 @@ public class AMChatRouter {
 			else{
 					amcMain.setPlayerLinkID(sender, "none");
 					toRadio(sender,message);
-				}			
-			} 		
-		else { // Not going over the radio deal with local
+				}	
+		} else {
+			amcMain.amcLogger.info("<"+sender.getDisplayName()+"> "+message);
 			toLocal(sender,(sender.getDisplayName()+": "+message));
-			}
-		
+		}
 	
 	}		
 	
