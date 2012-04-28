@@ -19,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class AMChat extends JavaPlugin {
 	
+	public static AMChat amcChatMain;		//handle for this plugin
 	AMCTools amcTools;						//tools for AMChat
 	AMChatRouter amcRouter;					//Chat router is responsible for deciding what to do with player chat events.
 	AMChatListener amcListener;				//Chat Listener
@@ -41,7 +42,7 @@ public class AMChat extends JavaPlugin {
 	//these are double because we calculate the distance versus this, and that variable is a double
 	double varPlayerMaxChatDist = 32;		// The Maximum Distance local chat will reach.
 	double varRadioMaxChatDist = 96;		// The Maximum Distance Radio chat will reach.
-	
+	boolean varManagePlayerChat = true;	// is our plugin responsible for dealing with non radio chat?
 	boolean varLimitPlayerChat = true;	// Should we limit the distance that non radio chat can reach?
 	boolean varLimitRadioChat = true;	// Should we limit the distance that a personal communicator can reach?
 	
@@ -116,6 +117,7 @@ public class AMChat extends JavaPlugin {
 		this.varRadioFreqSuffix = amcConfig.getString("radio-suffix",varRadioFreqSuffix);
 		this.varPlayerMaxChatDist = amcConfig.getDouble("chat-distance",varPlayerMaxChatDist);
 		this.varRadioMaxChatDist = amcConfig.getDouble("radio-distance", varRadioMaxChatDist);
+		this.varManagePlayerChat = amcConfig.getBoolean("manage-local", varManagePlayerChat);
 		this.varLimitPlayerChat = amcConfig.getBoolean("chat-limited", varLimitPlayerChat);
 		this.varLimitRadioChat = amcConfig.getBoolean("radio-limited", varLimitRadioChat);
 		this.varSkyWaveEnabled = amcConfig.getBoolean("enable-skywave", varSkyWaveEnabled);
@@ -142,6 +144,7 @@ public class AMChat extends JavaPlugin {
 		amcConfig.set("radio-suffix",varRadioFreqSuffix);
 		amcConfig.set("chat-distance",varPlayerMaxChatDist);
 		amcConfig.set("radio-distance", varRadioMaxChatDist);
+		amcConfig.set("manage-local", varManagePlayerChat);
 		amcConfig.set("chat-limited", varLimitPlayerChat);
 		amcConfig.set("radio-limited", varLimitRadioChat);
 		amcConfig.set("enable-skywave", varSkyWaveEnabled);
@@ -174,6 +177,7 @@ public class AMChat extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		// Load services, order is important!//
+		amcChatMain = this;
 		this.amcPdf = this.getDescription();
 		this.amcConfig = this.getConfig();
 		this.playerRadioConfig = this.getConfigPlayerRadioSettings();
@@ -392,6 +396,9 @@ public class AMChat extends JavaPlugin {
 		return this.varSkyWaveEnabled;
 	}	
 
+	public boolean isLocalManaged(){
+		return this.varManagePlayerChat;
+	}
 	//This is resource intensive don't use it allot. 
 	public List<Player> getPlayersByLinkID(String varLinkID){
 		List<Player> varList = new ArrayList<Player>();
@@ -702,6 +709,10 @@ public class AMChat extends JavaPlugin {
 		amcTools.msgToPlayer(sender, pingMessage);
 		}
 		
+	}
+	
+	public static AMChat getHandle(){
+		return amcChatMain;
 	}
 	
 }//EOF
