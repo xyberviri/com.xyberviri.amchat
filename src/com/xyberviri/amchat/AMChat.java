@@ -56,6 +56,7 @@ public class AMChat extends JavaPlugin {
 	int varRadioMaxCuttoff = 15;
 	int varRadioMinCode = 0;			// this is the minimum valid code key, 0 = disabled; This really shouldn't be changed.
 	int varRadioMaxCode = 999;			// max value encryption key we will use for transmission.
+	int varRadioMaxHeight = 256;		// the maximum height that we will check for radio componets. 
 
 	int varScheduleTickRate=20;			//This is the value for the tick rate used by the scheduler
 	long varScheduleSaveRate=600000;	//this is how many milliseconds we should wait before we save the active radios.
@@ -134,6 +135,7 @@ public class AMChat extends JavaPlugin {
 		this.varFixedRadioUserModI = amcConfig.getInt("antenna-user-mod-iron",varFixedRadioUserModI);
 		this.varFixedRadioUserModG = amcConfig.getInt("antenna-user-mod-gold",varFixedRadioUserModG);
 		this.varFixedRadioUserModD = amcConfig.getInt("antenna-user-mod-diamond",varFixedRadioUserModD);
+		this.varRadioMaxHeight = amcConfig.getInt("antenna-max-height", varRadioMaxHeight);
 		this.varScheduleTickRate = amcConfig.getInt("antenna-tick-rate",varScheduleTickRate);
 		this.varScheduleSaveRate = amcConfig.getLong("save-interval",varScheduleSaveRate);
 	}
@@ -162,6 +164,7 @@ public class AMChat extends JavaPlugin {
 		amcConfig.set("antenna-user-mod-gold",varFixedRadioUserModG);
 		amcConfig.set("antenna-user-mod-diamond",varFixedRadioUserModD);
 		amcConfig.set("antenna-tick-rate",varScheduleTickRate);
+		amcConfig.set("antenna-max-height", varRadioMaxHeight);
 		amcConfig.set("save-interval",varScheduleSaveRate);
 		this.saveConfig();
 	}
@@ -195,9 +198,7 @@ public class AMChat extends JavaPlugin {
 		
 		this.getCommand("am").setExecutor(amcCmd);
 		this.getCommand("xm").setExecutor(amcCmd);
-		
-	
-		
+
 		logMessage("Enabled");
 	}
 	
