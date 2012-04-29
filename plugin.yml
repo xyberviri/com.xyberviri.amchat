@@ -1,7 +1,7 @@
 name: AMChat
 author: Xyberviri
 main: com.xyberviri.amchat.AMChat
-version: 0.3.5
+version: 0.4.0
 description: Radio based communication
 commands:
    am:
