@@ -6,7 +6,6 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import com.xyberviri.amchat.events.AMChatEvent;
-import com.xyberviri.amchat.events.AMChatRadioEvent;
 import com.xyberviri.amchat.events.AMEventCenter;
 
 public class AMChatRouter {
