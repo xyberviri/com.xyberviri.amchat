@@ -32,11 +32,11 @@ public class AMChatListener implements Listener {
         Block block = event.getBlock();
         //amcMain.logMessage(event.getPlayer().getDisplayName()+" placed "+block.getType());
         if (block.getType() == Material.JUKEBOX && (event.getPlayer().isSneaking()) && event.getPlayer().hasPermission("amchat.radio.fixed.create")){
-        	if(block.getY() >= block.getWorld().getSeaLevel()){
+        	if(block.getY() >= block.getWorld().getSeaLevel() && (block.getY() <= amcMain.varRadioMaxHeight)){
         		amcMain.amcRadMan.createNewRadio(event.getPlayer(), block.getLocation());
         	} else {
         		event.setCancelled(true);
-        		amcMain.amcTools.errorToPlayer(event.getPlayer(), "Unable to place a radio this low, you have to be at least at sea level.");
+        		amcMain.amcTools.errorToPlayer(event.getPlayer(), "Unable to place radio at this height, limits are "+block.getWorld().getSeaLevel()+"-"+amcMain.varRadioMaxHeight);
         	}
         	     	
         }        		
@@ -47,13 +47,11 @@ public class AMChatListener implements Listener {
 		if(event.isCancelled()) return;	
 		Player sender = event.getPlayer();
 		boolean isRadio, isOurs = false; //is this a XCast, Does this even belong to AMChat.
-		
 		//Decide if this is a our chat event.		
 		if(amcMain.isRadioOn(sender)&&amcMain.getPlayerMic(sender)){
 			//Radio on and Mic open, send via radio
 			isOurs = true;
-			isRadio = true;
-						
+			isRadio = true;	
 			if(amcMain.varHeldItemReq){
 				//Additional checks if we "need to have a radio" 
 				if(sender.getItemInHand().getTypeId() == amcMain.varHeldItemID ||sender.getInventory().contains(amcMain.varHeldItemID)){
@@ -80,8 +78,7 @@ public class AMChatListener implements Listener {
 		
 		//If this is our event then cancel the original chat event 
 		if (isOurs){
-//			AMChatEvent newAmChatEvent = new AMChatEvent (sender, event.getMessage(),isRadio,amcMain.getPlayerRadioChannel(sender),amcMain.getPlayerRadioCode(sender));
-//			amcMain.getServer().getPluginManager().callEvent(newAmChatEvent);
+			//This is the actual hand off to AMChat.
 			AMEventCenter.callAmChatEvent(sender, event.getMessage(),isRadio,amcMain.getPlayerRadioChannel(sender),amcMain.getPlayerRadioCode(sender));
 			event.setCancelled(true);
 			} else {
@@ -96,8 +93,8 @@ public class AMChatListener implements Listener {
     		this.amcMain.amcRouter.AMChatEvent(event);
     }
     
-	@EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerLogin(PlayerJoinEvent event){    	
+	@EventHandler
+    public void onPlayerLogin(PlayerJoinEvent event){  
     		Player player = event.getPlayer();
     		this.amcMain.loadPlayerRadioSettings(player);
     }
@@ -106,7 +103,7 @@ public class AMChatListener implements Listener {
     public void onPlayerLogout(PlayerQuitEvent event){
     		Player player = event.getPlayer();
     		amcMain.savePlayerRadioSettings(player);
-    		amcMain.amcRadMan.unlinkPlayerFromRadio(player, amcMain.getPlayerLinkID(player),false);
+    		amcMain.amcRadMan.unlinkPlayerFromRadio(player, amcMain.getPlayerLinkID(player),false); 
     }
 
 	public boolean isLoaded(AMChat amcMainPlugin) {
@@ -114,7 +111,7 @@ public class AMChatListener implements Listener {
 		return false;
 	}
 	
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteract(PlayerInteractEvent event) {
     	if(event.getPlayer().getItemInHand().getTypeId() == amcMain.varHeldItemID){
     		if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
