@@ -30,13 +30,23 @@ public class AMChatListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent event) {
     	if(event.isCancelled()){return;}
         Block block = event.getBlock();
+//        amcMain.logMessage("BY:"+block.getY());
+//        amcMain.logMessage("SL:"+block.getWorld().getSeaLevel());
+//        amcMain.logMessage("MH:"+block.getWorld().getMaxHeight());
+        
         //amcMain.logMessage(event.getPlayer().getDisplayName()+" placed "+block.getType());
         if (block.getType() == Material.JUKEBOX && (event.getPlayer().isSneaking()) && event.getPlayer().hasPermission("amchat.radio.fixed.create")){
-        	if(block.getY() >= block.getWorld().getSeaLevel() && (block.getY() <= amcMain.varRadioMaxHeight)){
+        	if(block.getY() >= block.getWorld().getSeaLevel()-1 && (block.getY() <= amcMain.varRadioMaxHeight)){
         		amcMain.amcRadMan.createNewRadio(event.getPlayer(), block.getLocation());
         	} else {
         		event.setCancelled(true);
-        		amcMain.amcTools.errorToPlayer(event.getPlayer(), "Unable to place radio at this height, limits are "+block.getWorld().getSeaLevel()+"-"+amcMain.varRadioMaxHeight);
+        		String varErrorMessage="";
+        		if (block.getY() >= block.getWorld().getSeaLevel()-1){
+        			varErrorMessage="IN RESTRICTED AIR SPACE";
+        		} else {
+        			varErrorMessage="NOT ABOVE SEA LEVEL";
+        		}
+        		amcMain.amcTools.msgToPlayer(event.getPlayer(),"Unable to build here, ",varErrorMessage);
         	}
         	     	
         }        		

@@ -45,6 +45,7 @@ public class AMChat extends JavaPlugin {
 	boolean varManagePlayerChat = true;	// is our plugin responsible for dealing with non radio chat?
 	boolean varLimitPlayerChat = true;	// Should we limit the distance that non radio chat can reach?
 	boolean varLimitRadioChat = true;	// Should we limit the distance that a personal communicator can reach?
+	boolean varUseRPMessages = true;	// Should we use the Role playing responses?
 	
 	double varRadioSkyWaveMod = 2;		// This distance to modify the chat distance for radios at night.
 	boolean varSkyWaveEnabled = false;	// Is SkyWave Effect enabled?
@@ -56,7 +57,7 @@ public class AMChat extends JavaPlugin {
 	int varRadioMaxCuttoff = 15;
 	int varRadioMinCode = 0;			// this is the minimum valid code key, 0 = disabled; This really shouldn't be changed.
 	int varRadioMaxCode = 999;			// max value encryption key we will use for transmission.
-	int varRadioMaxHeight = 256;		// the maximum height that we will check for radio componets. 
+	int varRadioMaxHeight = 254;		// the maximum height that we will check for radio components. 
 
 	int varScheduleTickRate=20;			//This is the value for the tick rate used by the scheduler
 	long varScheduleSaveRate=600000;	//this is how many milliseconds we should wait before we save the active radios.

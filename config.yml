@@ -1,24 +1,72 @@
 # config.yml
-radio-format: '&3[&4%FREQ.%CODE&f%SUFFIX&a]&e%SENDER&7: %MESSAGE'
+#Radio Transmission format
+radio-format: '&2[&6%FREQ.%CODE&7%SUFFIX&2]&e%SENDER&f: %MESSAGE'
+#Tower Member receive format
 broadcast-format: '&2[&6%LINKID&2]&e%SENDER&f: %MESSAGE'
+#band name, this doesn't affect anything, its only used in the message format.
 radio-suffix: rHz
+#if we manage local chat, and its restricted how far does it reach?
 chat-distance: 32.0
+#how far does radio chat reach
 radio-distance: 96.0
+#Does AMChat manage local chat? (AKA chat that isn't sent via radios)
+#If you want this to work with another plugin set this to false
+manage-local: true
+#Should we enforce the chat-distance limit when players communicate normally?
+#If manage-local is false this doesn't do anything
 chat-limited: true
+#Should we enforce the radio-distance limit when players communicate with radios?
 radio-limited: true
+#Is Skywave effect enabled?
+#NOTE:Doesn't do anything at the moment.
 enable-skywave: false
+#How far should we boost the radio chat distance when skywave is in effect?
 skywave-mod: 2.0
+
+#Limits
+#Lowest frequency users can select
+#note: does not apply to /ops or players with amchat.radio.override.tune permission
 radio-min: 32
+#Highest frequency users can select
+#note: does not apply to /ops or players with amchat.radio.override.tune permission
 radio-max: 512
+#How wide of a cutoff can a player set their radio to?
+#note: does not apply to /ops or players with amchat.radio.override.cutoff permission
 radio-cutoff-max: 15
+#Whats the highest encryption code a player can use?
+#note: does not apply to /ops or players with amchat.radio.override.code permission
 radio-code-max: 999
+
+#Settings
+#When a player joins for the first time we want to set them to a common channel
+#This also is used when a player types /am home
 radio-default-channel: 64
+#When a player joins the server and they do not have a saved profile should we automatically turn on their radio?
 radio-auto-on: true
+#What item do we want to use as our radio?(345:Compass is the default)
 radio-item-id: 345
+#Is this item required use the radio or perform /am or /xm commands?
 radio-item-required: false
+
+#Fixed Radio Settings
+#For each Iron Fence we increase the range by the antenna-range-mod
+#By default he base radio also has this bonus to the range
 antenna-range-mod: 10.0
+#User plugin blocks
+#Iron blocks add 1 user capacity by default
 antenna-user-mod-iron: 1
+#Gold blocks add 3 user capacity by default
 antenna-user-mod-gold: 3
+#Diamond blocks add 1 user capacity by default
 antenna-user-mod-diamond: 7
+
+
+#How many ticks between tower checks, 20 = every 1 second
+#This effects sign updates, tower ability updates
 antenna-tick-rate: 20
+#How often should we save the fixed radio database to file?
+#Default is 600000ms which is every 10 minutes
 save-interval: 600000
+#What is the maximum height we can build a fixed radio site at?
+#This is the height we also stop checking for radio blocks.(antenna, user blocks)
+antenna-max-height: 254
