@@ -119,7 +119,7 @@ public class AMChatRadio {
 			World world = varRadioLoc.getWorld();
 			
 			for(;y < varRadioLoc.getWorld().getMaxHeight();){
-				if (y >= amcRadMan.amcMain.varRadioMaxHeight){break;}
+				if (y > amcRadMan.amcMain.varRadioMaxHeight){break;}
 				Material blockType = world.getBlockAt(x, y, z).getType();
 				if(blockType.equals(Material.IRON_FENCE)){
 					this.varRadioABlocks++;
