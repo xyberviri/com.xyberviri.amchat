@@ -210,8 +210,10 @@ public class AMChat extends JavaPlugin {
 	// Log error message to console, disable plugin. These really never should occur, if they do we need to shut down the plugin and let the sever manager know.  
 	public void logError(String message){
 		amcLogger.severe("["+amcPdf.getName()+"] WARNING "+message);
+		amcLogger.severe("["+amcPdf.getName()+"] WARNING Plugin auto disable triggered.");
 		if (this.isEnabled()){this.getServer().getPluginManager().disablePlugin(this);
-		amcLogger.severe("["+amcPdf.getName()+"] WARNING Plugin auto disable triggered.");}}
+		amcLogger.severe("["+amcPdf.getName()+"] WARNING "+amcPdf.getName()+" has been disabled automatically as a safty measure.");
+		amcLogger.severe("["+amcPdf.getName()+"] WARNING Contact developer!!!");}}
 		
 	@SuppressWarnings("unchecked")
 	public void loadPlayerRadioSettings(Player player){
