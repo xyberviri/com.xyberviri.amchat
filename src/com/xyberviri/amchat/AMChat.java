@@ -496,7 +496,7 @@ public class AMChat extends JavaPlugin {
 	
 	public void scanPlayerRadioChannel(Player player,boolean varDirection){
 		if(isPlayerLinked(player)){
-			amcTools.msgToPlayer(player, "TODO:Scanning for radio links direction up:"+varDirection);
+			amcTools.msgToPlayer(player, "Scanning disabled while linked to a fixed radio!");
 		} else {
 		int playerOnThisChan = varRadioMinFreq;
 		if(playerRadioChannel.containsKey(player)){
@@ -522,6 +522,8 @@ public class AMChat extends JavaPlugin {
 		tunePlayerRadioChannel(player,playerOnThisChan);
 		}
 	}
+	
+
 	
 	// Return the integer of the radio code the player is using
 	// if the value is null, set it to the minimum value, 0=disabled;
