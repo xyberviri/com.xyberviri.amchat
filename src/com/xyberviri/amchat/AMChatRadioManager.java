@@ -296,20 +296,22 @@ public class AMChatRadioManager {
 	}
 	
 	public boolean linkPlayerToRadio(Player player,String linkID){
+		String curLinkID = amcMain.getPlayerLinkID(player);
+		if(curLinkID.equals(linkID)){
+			amcMain.amcTools.errorToPlayer(player, "Sorry, you are already connected to that radio.");
+			return false;
+		}
 		//canLink
 		if(amRadioHandles.containsKey(linkID)){
 			AMChatRadio targetRadio=amRadioHandles.get(linkID);
 			if(amcMain.canLink(targetRadio, player)){
 				if(targetRadio.roomToJoin()){
-					String curLinkID = amcMain.getPlayerLinkID(player);
 					if(isLinkValid(curLinkID)){amRadioHandles.get(curLinkID).delUser(player);}
-			
 					targetRadio.linkPlayer(player);	
 					amcMain.setPlayerLinkID(player, targetRadio.getName());
 					amcMain.tunePlayerRadioChannel(player,targetRadio.getChan());
 					amcMain.setPlayerRadioCode(player, targetRadio.getCode());
 					player.setCompassTarget(targetRadio.getLoc());
-					
 					amcMain.amcTools.msgToPlayer(player, "A link has successfully been established to ",linkID);
 					AMEventCenter.callAMChatRadioJoinEvent(player, targetRadio);
 					return true;
