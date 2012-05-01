@@ -45,9 +45,9 @@ commands:
       permission: amchat.radio.list.personal
       usage: Usage /am list
    xm:
-      description: display information about your fixed radio towers
+      description: display information about your fixed radio towers, link to a favorite radio
       permission: amchat.radio.fixed.use
-      usage: Usage /xm
+      usage: Usage /xm | /xm <favid>
    xm list:
       description: lists all of the radios on the server with all information.
       permission: amchat.radio.list.fixed
@@ -55,7 +55,7 @@ commands:
    xm link:
       description: link to a fixed radio tower, a password is required in most cases.
       permission: amchat.radio.fixed.link
-      usage: Usage /xm <id> <password>
+      usage: Usage /xm link <id> <password>
    xm unlink:
       description: unlinks from a radio tower
       permission: amchat.radio.fixed.link
@@ -69,9 +69,9 @@ commands:
       permission: amchat.radio.fixed.chown
       usage: Usage /XM chown <id> <onlineplayer> |/XM chown <id> <offlineplayer> <offlineplayer>
    xm fav:         
-      description: Displays a list of favorite radios, admin list 
+      description: Displays a list of favorite radios, toggle favorite for a specific radio, use /xm #
       permission: amchat.radio.fixed.fav
-      usage: Usage /xm fav|fav add <id>|fav del <id>
+      usage: Usage /xm fav <id>
    xm info:         
       description: Displays information about a specific radio tower 
       permission: amchat.radio.fixed.info
