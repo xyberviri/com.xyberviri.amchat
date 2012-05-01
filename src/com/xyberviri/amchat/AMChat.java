@@ -46,6 +46,7 @@ public class AMChat extends JavaPlugin {
 	boolean varLimitPlayerChat = true;	// Should we limit the distance that non radio chat can reach?
 	boolean varLimitRadioChat = true;	// Should we limit the distance that a personal communicator can reach?
 	boolean varUseRPMessages = true;	// Should we use the Role playing responses?
+	boolean varUpdateWaypointOnLink = true;
 	
 	double varRadioSkyWaveMod = 2;		// This distance to modify the chat distance for radios at night.
 	boolean varSkyWaveEnabled = false;	// Is SkyWave Effect enabled?
@@ -138,7 +139,8 @@ public class AMChat extends JavaPlugin {
 		this.varFixedRadioUserModD = amcConfig.getInt("antenna-user-mod-diamond",varFixedRadioUserModD);
 		this.varRadioMaxHeight = amcConfig.getInt("antenna-max-height", varRadioMaxHeight);
 		this.varScheduleTickRate = amcConfig.getInt("antenna-tick-rate",varScheduleTickRate);
-		this.varScheduleSaveRate = amcConfig.getLong("save-interval",varScheduleSaveRate);
+		this.varScheduleSaveRate = amcConfig.getLong("save-interval",varScheduleSaveRate);		
+		this.varUpdateWaypointOnLink = amcConfig.getBoolean("waypoint-update", varUpdateWaypointOnLink);
 	}
 	
 	public void saveSettings(){
@@ -167,6 +169,7 @@ public class AMChat extends JavaPlugin {
 		amcConfig.set("antenna-tick-rate",varScheduleTickRate);
 		amcConfig.set("antenna-max-height", varRadioMaxHeight);
 		amcConfig.set("save-interval",varScheduleSaveRate);
+		amcConfig.set("waypoint-update", varUpdateWaypointOnLink);
 		this.saveConfig();
 	}
 	

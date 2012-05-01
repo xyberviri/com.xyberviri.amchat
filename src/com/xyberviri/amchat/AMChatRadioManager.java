@@ -311,7 +311,7 @@ public class AMChatRadioManager {
 					amcMain.setPlayerLinkID(player, targetRadio.getName());
 					amcMain.tunePlayerRadioChannel(player,targetRadio.getChan());
 					amcMain.setPlayerRadioCode(player, targetRadio.getCode());
-					player.setCompassTarget(targetRadio.getLoc());
+					if(amcMain.varUpdateWaypointOnLink){player.setCompassTarget(targetRadio.getLoc());}
 					amcMain.amcTools.msgToPlayer(player, "A link has successfully been established to ",linkID);
 					AMEventCenter.callAMChatRadioJoinEvent(player, targetRadio);
 					return true;
