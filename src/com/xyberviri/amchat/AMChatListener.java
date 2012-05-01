@@ -63,8 +63,8 @@ public class AMChatListener implements Listener {
 			isOurs = true;
 			isRadio = true;	
 			if(amcMain.varHeldItemReq){
-				//Additional checks if we "need to have a radio" 
-				if(sender.getItemInHand().getTypeId() == amcMain.varHeldItemID ||sender.getInventory().contains(amcMain.varHeldItemID)){
+				//Additional checks if we "need to have a radio"
+				if(sender.getItemInHand().getTypeId() == amcMain.varHeldItemID){
 					//I'm either holding a radio or have one in my inventory.
 				} else if (amcMain.isLocalManaged()){
 					//This is local chat and this plugin is managing local chat also.
@@ -86,7 +86,7 @@ public class AMChatListener implements Listener {
 			isOurs = false;
 		}
 		
-		//If this is our event then cancel the original chat event 
+		//If this is our event so cancel the original chat event 
 		if (isOurs){
 			//This is the actual hand off to AMChat.
 			AMEventCenter.callAmChatEvent(sender, event.getMessage(),isRadio,amcMain.getPlayerRadioChannel(sender),amcMain.getPlayerRadioCode(sender));
