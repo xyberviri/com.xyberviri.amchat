@@ -56,44 +56,24 @@ public class AMChatListener implements Listener {
 	public void onPlayerChat(PlayerChatEvent event){
 		if(event.isCancelled()) return;	
 		Player sender = event.getPlayer();
-		boolean isRadio, isOurs = false; //is this a XCast, Does this even belong to AMChat.
-		//Decide if this is a our chat event.		
+		boolean isRadio = false; 
+		
+		//Check if the radio is on and the mic is open
 		if(amcMain.isRadioOn(sender)&&amcMain.getPlayerMic(sender)){
-			//Radio on and Mic open, send via radio
-			isOurs = true;
-			isRadio = true;	
-			if(amcMain.varHeldItemReq){
-				//Additional checks if we "need to have a radio"
-				if(sender.getItemInHand().getTypeId() == amcMain.varHeldItemID){
-					//I'm either holding a radio or have one in my inventory.
-				} else if (amcMain.isLocalManaged()){
-					//This is local chat and this plugin is managing local chat also.
-					isRadio = false;
-				} else {
-					//Local chat and this plugin doesn't handle local chat.
-					isRadio = false;
-					isOurs = false;
-				}				
-			}//End Checks for Held requirement. 
-			
-		} else if (amcMain.isLocalManaged()){
-			//No active open mic or active radio, Its ours if AMChat takes care of local
-			isOurs = true;
-			isRadio = false;			
-		} else {
-			//Local chat and this plugin doesn't handle local chat.
-			isRadio = false;
-			isOurs = false;
+			isRadio = true;
+			//If the server requires the item in hand and we don't have it, flag this as non radio chat.
+			if(amcMain.varHeldItemReq && sender.getItemInHand().getTypeId() != amcMain.varHeldItemID)
+			{isRadio = false;}
 		}
 		
-		//If this is our event so cancel the original chat event 
-		if (isOurs){
-			//This is the actual hand off to AMChat.
-			AMEventCenter.callAmChatEvent(sender, event.getMessage(),isRadio,amcMain.getPlayerRadioChannel(sender),amcMain.getPlayerRadioCode(sender));
-			event.setCancelled(true);
-			} else {
-				//This isn't an AMChat event
-			}	
+		
+		if((!isRadio) && (!amcMain.isLocalManaged())){
+			amcMain.logMessage("Ignoring chat event");
+			return;
+		}
+		
+		AMEventCenter.callAmChatEvent(sender, event.getMessage(),isRadio,amcMain.getPlayerRadioChannel(sender),amcMain.getPlayerRadioCode(sender));
+		event.setCancelled(true);
 	}
 	
 	
@@ -125,6 +105,7 @@ public class AMChatListener implements Listener {
     public void onPlayerInteract(PlayerInteractEvent event) {
     	if(event.getPlayer().getItemInHand().getTypeId() == amcMain.varHeldItemID){
     		if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
+    			//TODO:Add Options here for players to have shortcuts on left/right mouse buttons. 
     			amcMain.scanPlayerRadioChannel(event.getPlayer(), true);
     		} else {
     			amcMain.scanPlayerRadioChannel(event.getPlayer(), false);
