@@ -5,7 +5,7 @@ import org.bukkit.Location;
 
 import org.bukkit.entity.Player;
 
-import com.xyberviri.amchat.events.AMChatEvent;
+import com.xyberviri.amchat.events.AMChatPlayerChat;
 
 public class AMChatRouter {
 	AMChat amcMain;
@@ -14,7 +14,7 @@ public class AMChatRouter {
 		this.amcMain = amChat;
 	}	
 	
-	public void AMChatEvent(AMChatEvent event) {
+	public void AMChatEvent(AMChatPlayerChat event) {
 		Player sender = event.getPlayer();
 		String message = event.getMessage();	
 		

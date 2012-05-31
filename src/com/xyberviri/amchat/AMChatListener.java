@@ -12,8 +12,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import com.xyberviri.amchat.events.AMChatEvent;
-import com.xyberviri.amchat.events.AMEventCenter;
+import com.xyberviri.amchat.events.AMChatPlayerChat;
+import com.xyberviri.amchat.events.EventCenter;
 
 
 public class AMChatListener implements Listener {
@@ -72,13 +72,13 @@ public class AMChatListener implements Listener {
 			return;
 		}
 		
-		AMEventCenter.callAmChatEvent(sender, event.getMessage(),isRadio,amcMain.getPlayerRadioChannel(sender),amcMain.getPlayerRadioCode(sender));
+		EventCenter.callAmChatEvent(sender, event.getMessage(),isRadio,amcMain.getPlayerRadioChannel(sender),amcMain.getPlayerRadioCode(sender));
 		event.setCancelled(true);
 	}
 	
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
-    public void onAMChat(AMChatEvent event) {
+    public void onAMChat(AMChatPlayerChat event) {
 		if(event.isCancelled()) return;
     		this.amcMain.amcRouter.AMChatEvent(event);
     }

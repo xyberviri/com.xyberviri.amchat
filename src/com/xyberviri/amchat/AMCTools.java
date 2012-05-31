@@ -7,17 +7,9 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class AMCTools {
-	AMChat amcMain;
-	
 
-
-	
-	public AMCTools(AMChat amChat){
-		this.amcMain = amChat;
+	public AMCTools(){
 	}
-	
-
-	
 	
 	public double getDistance(Location location1,Location location2){
 		// This only accepts location objects. 
@@ -54,14 +46,14 @@ public class AMCTools {
 		if (player instanceof Player){
 			player.sendMessage(ChatColor.YELLOW + message);
 		} else {
-			amcMain.amcLogger.info(message);
+			AMChat.logMessage(message);
 		}
 	}
 	public void msgToPlayer(Player player,String message,String message2){
 		if (player instanceof Player){
 			player.sendMessage(ChatColor.YELLOW + message+ChatColor.WHITE+message2);
 		} else {
-			amcMain.amcLogger.info(message+message2);
+			AMChat.logMessage(message+message2);
 		}
 	}
 		
@@ -70,7 +62,7 @@ public class AMCTools {
 		if (player instanceof Player){
 			player.sendMessage(ChatColor.RED + message);
 		} else {
-			amcMain.amcLogger.info(message);
+			AMChat.logMessage(message);
 		}
 	}	
 

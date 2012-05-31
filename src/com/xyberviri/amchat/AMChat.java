@@ -18,200 +18,68 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class AMChat extends JavaPlugin {
+	private static final Logger amcLogger = Logger.getLogger("Minecraft");
+	private static AMChat amcChatMain;				//handle for this plugin
+	private static AMCTools amcTools;				//tools for AMChat
+	private static AMChatSettingsManager amcSetMan;	//Settings Manager
 	
-	public static AMChat amcChatMain;		//handle for this plugin
-	AMCTools amcTools;						//tools for AMChat
+
+	
+	
+	
+
+	
+	
 	AMChatRouter amcRouter;					//Chat router is responsible for deciding what to do with player chat events.
 	AMChatListener amcListener;				//Chat Listener
 	AMChatCmd amcCmd;						//AMC Command control
 	AMChatRadioManager amcRadMan;			//
+	
 	PluginDescriptionFile amcPdf;			//Plugin Description File
 	FileConfiguration amcConfig;			//config.yml file
-	
-	private FileConfiguration playerRadioConfig=null;
-	private File playerRadioConfigFile = null;
 
-	final Logger amcLogger = Logger.getLogger("Minecraft");
 	
-	// Settings
-	String varMsgFormat = ChatColor.DARK_GREEN+"["+ChatColor.GOLD+"%FREQ.%CODE"+ChatColor.GRAY+"%SUFFIX"+ChatColor.DARK_GREEN+"]"+ChatColor.YELLOW+"%SENDER"+ChatColor.WHITE+": %MESSAGE";
-	String varBCsatMsgFormat = ChatColor.DARK_GREEN+"["+ChatColor.GOLD+"%LINKID"+ChatColor.DARK_GREEN+"]"+ChatColor.YELLOW+"%SENDER"+ChatColor.WHITE+": %MESSAGE";
 	
-	String varRadioFreqSuffix = "rHz"; 		// frequency string name
-	
-	//these are double because we calculate the distance versus this, and that variable is a double
-	double varPlayerMaxChatDist = 32;		// The Maximum Distance local chat will reach.
-	double varRadioMaxChatDist = 96;		// The Maximum Distance Radio chat will reach.
-	boolean varManagePlayerChat = true;	// is our plugin responsible for dealing with non radio chat?
-	boolean varLimitPlayerChat = true;	// Should we limit the distance that non radio chat can reach?
-	boolean varLimitRadioChat = true;	// Should we limit the distance that a personal communicator can reach?
-	boolean varUseRPMessages = true;	// Should we use the Role playing responses?
-	boolean varUpdateWaypointOnLink = true;
-	
-	double varRadioSkyWaveMod = 2;		// This distance to modify the chat distance for radios at night.
-	boolean varSkyWaveEnabled = false;	// Is SkyWave Effect enabled?
-	
-	boolean varRadioAutoOn = true;		// if we should automatically turn a players radio on
-	int varRadioDefFreq = 64;			// The first time a invalid frequency is returned, return this instead. this is also the /am home channel 
-	int varRadioMinFreq = 32;			// this is the lowest frequency we can set for transmitting
-	int varRadioMaxFreq = 512;			// this is the highest frequency we can set for transmitting
-	int varRadioMaxCuttoff = 15;
-	int varRadioMinCode = 0;			// this is the minimum valid code key, 0 = disabled; This really shouldn't be changed.
-	int varRadioMaxCode = 999;			// max value encryption key we will use for transmission.
-	int varRadioMaxHeight = 254;		// the maximum height that we will check for radio components. 
 
-	int varScheduleTickRate=20;			//This is the value for the tick rate used by the scheduler
-	long varScheduleSaveRate=600000;	//this is how many milliseconds we should wait before we save the active radios.
 	
-	int varHeldItemID = 345;			// the held item that is our radio
-	boolean varHeldItemReq = false;		// is the held item needed so we can use our radio.
 	
-	double varFixedRadioRangeMod=10;	// this is the distance each antenna block gives our fixed radios.	
-	int varFixedRadioUserModI=1;		// this is the additional number of users that a radio can support with each additional iron block
-	int varFixedRadioUserModG=3;		// "		"		"		"		"		"		gold block
-	int varFixedRadioUserModD=7;		// "		"		"		"		"		"		diamond block
-	
-	ArrayList<String>    playerRadioOn = new ArrayList<String>();				// List of players with Radios On
-	Map<Player, Integer> playerRadioChannel = new HashMap<Player, Integer>(); 	// player radio channel
-	Map<Player, Integer> playerRadioCode = new HashMap<Player, Integer>(); 		// Player radio encoding key
-	Map<Player, Boolean> playerRadioMic = new HashMap<Player, Boolean>();		// Player radio broadcasting enabled	
-	Map<Player, Boolean> playerRadioFilter = new HashMap<Player, Boolean>();	// Player radio filter blocks encrypted chat that is otherwise unreadable
-	Map<Player, Integer> playerRadioCutoff = new HashMap<Player, Integer>();	// Player radio cutoff blocks other channels, i.e. cross talk, we might make this a integer later
-	Map<Player, String>  playerRadioLinkID = new HashMap<Player,String>();		// If a player is linked to a tower this will be set to something. 		
-	Map<Player, ArrayList<String>>  playerFavRadios = new HashMap<Player,ArrayList<String>>();
-	
-	//Player Settings File Reload/Get/Save//
-	public void reloadConfigPlayerRadioSettings(){
-		if(playerRadioConfigFile==null){
-			playerRadioConfigFile=new File(this.getDataFolder(),"pl.settings.yml");
-		}
-		
-		playerRadioConfig = YamlConfiguration.loadConfiguration(playerRadioConfigFile);
-		InputStream defConfigStream = getResource("pl.settings.yml");
-		
-		if (defConfigStream != null) {
-			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-			playerRadioConfig.setDefaults(defConfig);
-	}}
-	
-	public FileConfiguration getConfigPlayerRadioSettings(){
-		if (playerRadioConfig==null){
-			reloadConfigPlayerRadioSettings();
-			}
-		return playerRadioConfig;			
-	}
-	
-	public void saveConfigPlayerRadioSettings(){
-		if (playerRadioConfigFile==null||playerRadioConfig==null){
-			logMessage("unable to save varible for Config or file is null");
-			return;}
-		try{
-			playerRadioConfig.save(playerRadioConfigFile);
-			logMessage("Saving player settings file");
-		} catch (IOException ex){
-			logMessage("Could not save player setting file "+playerRadioConfigFile+" IOexception " + ex.toString());
-		}
-		
-	}
-	
-	public void loadSettings(){
-		this.varMsgFormat = amcTools.formatLoadFix(amcConfig.getString("radio-format", varMsgFormat));
-		this.varBCsatMsgFormat = amcTools.formatLoadFix(amcConfig.getString("broadcast-format", varBCsatMsgFormat));		
-		this.varRadioFreqSuffix = amcConfig.getString("radio-suffix",varRadioFreqSuffix);
-		this.varPlayerMaxChatDist = amcConfig.getDouble("chat-distance",varPlayerMaxChatDist);
-		this.varRadioMaxChatDist = amcConfig.getDouble("radio-distance", varRadioMaxChatDist);
-		this.varManagePlayerChat = amcConfig.getBoolean("manage-local", varManagePlayerChat);
-		this.varLimitPlayerChat = amcConfig.getBoolean("chat-limited", varLimitPlayerChat);
-		this.varLimitRadioChat = amcConfig.getBoolean("radio-limited", varLimitRadioChat);
-		this.varSkyWaveEnabled = amcConfig.getBoolean("enable-skywave", varSkyWaveEnabled);
-		this.varRadioSkyWaveMod = amcConfig.getDouble("skywave-mod", varRadioSkyWaveMod);
-		this.varRadioMinFreq = amcConfig.getInt("radio-min", varRadioMinFreq);
-		this.varRadioMaxFreq = amcConfig.getInt("radio-max", varRadioMaxFreq);
-		this.varRadioMaxCuttoff = amcConfig.getInt("radio-cutoff-max", varRadioMaxCuttoff);
-		this.varRadioMaxCode = amcConfig.getInt("radio-code-max", varRadioMaxCode);
-		this.varRadioDefFreq = amcConfig.getInt("radio-default-channel", varRadioDefFreq);
-		this.varRadioAutoOn = amcConfig.getBoolean("radio-auto-on", varRadioAutoOn);
-		this.varHeldItemID = amcConfig.getInt("radio-item-id",varHeldItemID);
-		this.varHeldItemReq = amcConfig.getBoolean("radio-item-required", varHeldItemReq);
-		this.varFixedRadioRangeMod=amcConfig.getDouble("antenna-range-mod", varFixedRadioRangeMod);		
-		this.varFixedRadioUserModI = amcConfig.getInt("antenna-user-mod-iron",varFixedRadioUserModI);
-		this.varFixedRadioUserModG = amcConfig.getInt("antenna-user-mod-gold",varFixedRadioUserModG);
-		this.varFixedRadioUserModD = amcConfig.getInt("antenna-user-mod-diamond",varFixedRadioUserModD);
-		this.varRadioMaxHeight = amcConfig.getInt("antenna-max-height", varRadioMaxHeight);
-		this.varScheduleTickRate = amcConfig.getInt("antenna-tick-rate",varScheduleTickRate);
-		this.varScheduleSaveRate = amcConfig.getLong("save-interval",varScheduleSaveRate);		
-		this.varUpdateWaypointOnLink = amcConfig.getBoolean("waypoint-update", varUpdateWaypointOnLink);
-	}
-	
-	public void saveSettings(){
-		amcConfig.set("radio-format", amcTools.formatSaveFix(varMsgFormat));
-		amcConfig.set("broadcast-format", amcTools.formatSaveFix(varBCsatMsgFormat));
-		amcConfig.set("radio-suffix",varRadioFreqSuffix);
-		amcConfig.set("chat-distance",varPlayerMaxChatDist);
-		amcConfig.set("radio-distance", varRadioMaxChatDist);
-		amcConfig.set("manage-local", varManagePlayerChat);
-		amcConfig.set("chat-limited", varLimitPlayerChat);
-		amcConfig.set("radio-limited", varLimitRadioChat);
-		amcConfig.set("enable-skywave", varSkyWaveEnabled);
-		amcConfig.set("skywave-mod", varRadioSkyWaveMod);
-		amcConfig.set("radio-min", varRadioMinFreq);
-		amcConfig.set("radio-max", varRadioMaxFreq);
-		amcConfig.set("radio-cutoff-max", varRadioMaxCuttoff);
-		amcConfig.set("radio-code-max", varRadioMaxCode);
-		amcConfig.set("radio-default-channel", varRadioDefFreq);
-		amcConfig.set("radio-auto-on", varRadioAutoOn);	
-		amcConfig.set("radio-item-id",varHeldItemID);
-		amcConfig.set("radio-item-required", varHeldItemReq);
-		amcConfig.set("antenna-range-mod", varFixedRadioRangeMod);
-		amcConfig.set("antenna-user-mod-iron",varFixedRadioUserModI);
-		amcConfig.set("antenna-user-mod-gold",varFixedRadioUserModG);
-		amcConfig.set("antenna-user-mod-diamond",varFixedRadioUserModD);
-		amcConfig.set("antenna-tick-rate",varScheduleTickRate);
-		amcConfig.set("antenna-max-height", varRadioMaxHeight);
-		amcConfig.set("save-interval",varScheduleSaveRate);
-		amcConfig.set("waypoint-update", varUpdateWaypointOnLink);
-		this.saveConfig();
-	}
+
 	
 	@Override
 	public void onDisable() {
-		saveSettings();
-		saveConfigPlayerRadioSettings();
-		amcRadMan.saveRadioSettings();
-		logMessage("Disabled.");
+//		saveSettings();
+//		saveConfigPlayerRadioSettings();
+//		amcRadMan.saveRadioSettings();
+//		logMessage("Disabled.");
 	}
 
 	@Override
 	public void onEnable() {
 		// Load services, order is important!//
 		amcChatMain = this;
+		amcTools = new AMCTools();
+		amcSetMan = new AMChatSettingsManager();
+		
 		this.amcPdf = this.getDescription();
 		this.amcConfig = this.getConfig();
-		this.playerRadioConfig = this.getConfigPlayerRadioSettings();
-		this.amcTools = new AMCTools(this);
-		this.amcRouter = new AMChatRouter(this);
+
 		this.amcCmd = new AMChatCmd(this);
 		this.amcListener = new AMChatListener(this);
-		this.amcRadMan = new AMChatRadioManager(this);
-		loadSettings();
-		saveSettings();
-		
-
-		this.getServer().getPluginManager().registerEvents(amcListener, this);
-		this.getServer().getScheduler().scheduleSyncRepeatingTask(this, new AMChatRadioCheck(this),20,varScheduleTickRate);
 		
 		this.getCommand("am").setExecutor(amcCmd);
-		this.getCommand("xm").setExecutor(amcCmd);
-
+		this.getServer().getPluginManager().registerEvents(amcListener, this);
+		
 		logMessage("Enabled");
 	}
 	
-
+	public static AMChat get(){return amcChatMain;}
+	public static AMCTools tools(){return amcTools;}
+	public static AMChatSettingsManager settings(){return amcSetMan;}
 	// Log info message to console
-	public void logMessage(String message){amcLogger.info("["+amcPdf.getName()+"] "+message);}
+	protected static void logMessage(String message){amcLogger.info("["+amcChatMain.amcPdf.getName()+"] "+message);}
 	
 	// Log error message to console, disable plugin. These really never should occur, if they do we need to shut down the plugin and let the sever manager know.  
-	public void logError(String message){
+	protected void logError(String message){
 		amcLogger.severe("["+amcPdf.getName()+"] WARNING "+message);
 		amcLogger.severe("["+amcPdf.getName()+"] WARNING Plugin auto disable triggered.");
 		if (this.isEnabled()){this.getServer().getPluginManager().disablePlugin(this);
@@ -720,8 +588,6 @@ public class AMChat extends JavaPlugin {
 		
 	}
 	
-	public static AMChat getAMChatHandle(){
-		return amcChatMain;
-	}
+
 	
 }//EOF
