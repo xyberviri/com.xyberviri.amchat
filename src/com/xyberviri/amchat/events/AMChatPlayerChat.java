@@ -1,29 +1,29 @@
 package com.xyberviri.amchat.events;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.player.PlayerChatEvent;
 
-public class AMChatPlayerChat extends PlayerChatEvent {
-	private static final HandlerList handlers = new HandlerList();
+public class AMChatPlayerChat extends AMChatEvent {
+	private Player player;
+	private String message;
 	private int freq;
 	private int code;
 	private boolean isRadio;
 	
 	public AMChatPlayerChat(Player player, String message, boolean isRadio, int freq, int code) {
-		super(player, message);
-		// TODO Auto-generated constructor stub
-		this.isRadio = isRadio;
-		this.freq = freq;
-		this.code = code;
+		this.setPlayer(player);
+		this.setMessage(message);
+		this.setRadio(isRadio);
+		this.setFreq(freq);
+		this.setCode(code);
 	}
-	//is this Radio Chat?
-	public boolean isRadioChat(){return this.isRadio;}
-	//Frequency player transmitted this on
-	public int getFreq(){return this.freq;}
-	//Code this message is encrypted with
-	public int getCode(){return this.code;}
-	//Event handler lists
-	public HandlerList getHandlers(){return handlers;}
-	public static HandlerList getHandlerList(){return handlers;}
+	public Player getPlayer() {return player;}
+	public void setPlayer(Player player) {this.player = player;}
+	public String getMessage() {return message;}
+	public void setMessage(String message) {this.message = message;}
+	public int getFreq() {return freq;}
+	public void setFreq(int freq) {this.freq = freq;}
+	public int getCode() {return code;}
+	public void setCode(int code) {this.code = code;}
+	public boolean isRadio() {return isRadio;}
+	public void setRadio(boolean isRadio) {this.isRadio = isRadio;}
 }

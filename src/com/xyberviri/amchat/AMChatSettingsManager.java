@@ -2,7 +2,6 @@ package com.xyberviri.amchat;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,27 +13,44 @@ import org.bukkit.entity.Player;
 import com.xyberviri.amchat.radio.Radio;
 
 public class AMChatSettingsManager {
-	String varMsgFormat = ChatColor.DARK_GREEN+"["+ChatColor.GOLD+"%FREQ.%CODE"+ChatColor.GRAY+"%SUFFIX"+ChatColor.DARK_GREEN+"]"+ChatColor.YELLOW+"%SENDER"+ChatColor.WHITE+": %MESSAGE";
-	String varRadioFreqSuffix = "rHz"; 		// frequency string name
-	double varPlayerMaxChatDist = 32;		// The Maximum Distance local chat will reach.
-	double varRadioMaxChatDist = 96;		// The Maximum Distance Radio chat will reach.
-	boolean varManagePlayerChat = true;		// is our plugin responsible for dealing with non radio chat?
-	boolean varLimitPlayerChat = true;		// Should we limit the distance that non radio chat can reach?
-	boolean varLimitRadioChat = true;		// Should we limit the distance that a personal communicator can reach?
-	boolean varUseRPMessages = true;		// Should we use the Role playing responses?
 	
-	double varRadioSkyWaveMod = 2;			// This distance to modify the chat distance for radios at night.
-	boolean varSkyWaveEnabled = false;		// Is SkyWave Effect enabled?
+	public String getMsgFormat(){return varMsgFormat;}
+	public String getRadioSuffix(){return varRadioFreqSuffix;}
+	public double getMaxLocalDist(){return varPlayerMaxChatDist;}
+	public double getMaxRadioDist(){return varRadioMaxChatDist;}
+	public boolean isLocalManaged(){return varManagePlayerChat;}
+	public boolean isLocalLimited(){return varLimitPlayerChat;}
+	public boolean isRadioManaged(){return varLimitRadioChat;}
+	public boolean isSkyWaveEnabled(){return varSkyWaveEnabled;}
+	public double getSkyWaveMod(){return varSkyWaveMod;}
+	public boolean firstTimeOn(){return varRadioAutoOn;}
+	public int getDefaultFreq(){return varRadioDefFreq;}
+	public int getMinFreq(){return varRadioMinFreq;}
+	public int getMaxFreq(){return varRadioMaxFreq;}
+	public int getMaxCutoff(){return varRadioMaxCutoff;}
+	public int getMaxCode(){return varRadioMaxCode;}
+	public int getItemID(){return varHeldItemID;}
+	public boolean isItemRequired(){return varHeldItemReq;}
 	
-	boolean varRadioAutoOn = true;			// if we should automatically turn a players radio on
-	int varRadioDefFreq = 64;				// The first time a invalid frequency is returned, return this instead. this is also the /am home channel 
-	int varRadioMinFreq = 32;				// this is the lowest frequency we can set for transmitting
-	int varRadioMaxFreq = 512;				// this is the highest frequency we can set for transmitting
-	int varRadioMaxCuttoff = 15;
-	int varRadioMinCode = 0;				// this is the minimum valid code key, 0 = disabled; This really shouldn't be changed.
-	int varRadioMaxCode = 999;				// max value encryption key we will use for transmission.
-	int varHeldItemID = 345;				// the held item that is our radio
-	boolean varHeldItemReq = false;			// is the held item needed so we can use our radio.
+	private String varMsgFormat = ChatColor.DARK_GREEN+"["+ChatColor.GOLD+"%FREQ.%CODE"+ChatColor.GRAY+"%SUFFIX"+ChatColor.DARK_GREEN+"]"+ChatColor.YELLOW+"%SENDER"+ChatColor.WHITE+": %MESSAGE";
+	private String varRadioFreqSuffix = "rHz"; 		// frequency string name
+	private double varPlayerMaxChatDist = 32;		// The Maximum Distance local chat will reach.
+	private double varRadioMaxChatDist = 96;		// The Maximum Distance Radio chat will reach.
+	private boolean varManagePlayerChat = true;		// is our plugin responsible for dealing with non radio chat?
+	private boolean varLimitPlayerChat = true;		// Should we limit the distance that non radio chat can reach?
+	private boolean varLimitRadioChat = true;		// Should we limit the distance that a personal communicator can reach?
+
+	private double varSkyWaveMod = 2;				// This distance to modify the chat distance for radios at night.
+	private boolean varSkyWaveEnabled = false;		// Is SkyWave Effect enabled?
+	
+	private boolean varRadioAutoOn = true;			// if we should automatically turn a players radio on
+	private int varRadioDefFreq = 64;				// The first time a invalid frequency is returned, return this instead. this is also the /am home channel 
+	private int varRadioMinFreq = 32;				// this is the lowest frequency we can set for transmitting
+	private int varRadioMaxFreq = 512;				// this is the highest frequency we can set for transmitting
+	private int varRadioMaxCutoff = 15;
+	private int varRadioMaxCode = 999;				// max value encryption key we will use for transmission.
+	private int varHeldItemID = 345;				// the held item that is our radio
+	private boolean varHeldItemReq = false;			// is the held item needed so we can use our radio.
 
 	private FileConfiguration playerRadioConfig=null;
 	private File playerRadioConfigFile = null;
@@ -42,126 +58,33 @@ public class AMChatSettingsManager {
 	private Map <Player, Radio> 	playerRadios;	//Player Radio
 
 	AMChatSettingsManager(){
-		this.playerRadios = new HashMap<Player, Radio>();
-		
+		this.playerRadios = new HashMap<Player, Radio>();		
 		this.amcConfig = AMChat.get().getConfig();
-		this.playerRadioConfig = getConfigPlayerRadioSettings();
-		
-		initSettings();
-		
-	}
-
-	//Initialize Settings.
-	private void initSettings(){
-		loadSettings();	//Load any settings from config.yml to memory.
-		saveSettings();	//config.yml, if there isn't one this makes one in the plugin folder.  
+		this.playerRadioConfig = getConfigPlayerRadioSettings();		
+		loadSettings();
+		saveSettings();		
 	}
 	
-	public Radio player(Player vPlayer){
-		if(playerRadios.containsKey(vPlayer)){
-			return playerRadios.get(vPlayer);
+	public Radio player(Player player){
+		if(playerRadios.containsKey(player)){
+			return playerRadios.get(player);
 		} else {
-			return createNewRadio(vPlayer);
+			return createNewRadio(player);
 		}
 	}
 	
-	public Radio createNewRadio(Player vPlayer){
-		Radio vTemp = new Radio(varRadioDefFreq);
-		
-		return vTemp;
+	private Radio createNewRadio(Player player){
+		Radio temp = new Radio(varRadioDefFreq);
+		playerRadios.put(player, temp);		
+		return temp;
 	}
 	
 	
 	
 	
 	
-//	@SuppressWarnings("unchecked")
-//	public void loadPlayerRadioSettings(Player player){
-//		boolean playerHasSettings;		
-//		Map<String, Object> playerSetting = new HashMap<String,Object>();
-//		if (playerRadioConfig.isConfigurationSection(player.getDisplayName())){
-//			playerSetting = playerRadioConfig.getConfigurationSection(player.getDisplayName()).getValues(true);
-//			playerHasSettings=true;
-//		} 
-//		else{
-//			AMChat.logMessage("No Saved settings for player, loading defaults");
-//			playerHasSettings=false;
-//		}
-//		
-//		
-////		if (playerHasSettings && playerSetting.containsKey("radio")){			
-////			if(!isRadioOn(player)&&((Boolean) playerSetting.get("radio"))){togglePlayerRadio(player);}
-////		} else if (!isRadioOn(player) && varRadioAutoOn){
-////			togglePlayerRadio(player);
-////		}
-////		
-////		if(playerHasSettings && playerSetting.containsKey("freq")){
-////			tunePlayerRadioChannel(player, (Integer) playerSetting.get("freq"));
-////		} else {
-////			tunePlayerRadioChannel(player,varRadioDefFreq);
-////		}
-////		
-////		if(playerHasSettings && playerSetting.containsKey("code")){
-////			setPlayerRadioCode(player,(Integer) playerSetting.get("code"));
-////		} else {
-////			setPlayerRadioCode(player, 0);
-////		}
-////		
-////		if(playerHasSettings && playerSetting.containsKey("mic")){
-////			setPlayerMic(player, (Boolean) playerSetting.get("mic"));
-////		} else {
-////			setPlayerMic(player, true);
-////		}
-////		
-////		if(playerHasSettings && playerSetting.containsKey("filter")){
-////			setPlayerFilter(player, (Boolean) playerSetting.get("filter"));
-////		} else {
-////			setPlayerFilter(player, false);
-////		}
-////			
-////		if(playerHasSettings && playerSetting.containsKey("cutoff")){
-////			setPlayerRadioCutoff(player, (Integer) playerSetting.get("cutoff"));
-////		} else {
-////			setPlayerRadioCutoff(player, varRadioMaxCuttoff);
-////		}
-////		//String last link we had on logout. 
-////		if (playerHasSettings && playerSetting.containsKey("link") && amcRadMan.isLinkValid((String) playerSetting.get("link"))){
-////			amcRadMan.linkPlayerToRadio(player, (String) playerSetting.get("link"));
-////		} else {
-////			setPlayerLinkID(player, "none");
-////		}
-////		//ArrayList<String> Players favorite radios
-////		if(playerHasSettings && playerSetting.containsKey("favorites")){
-////			Object objAdmin=playerSetting.get("favorites");
-////			if (objAdmin instanceof ArrayList<?>){
-////				this.setFavRadios(player, (ArrayList<String>) objAdmin);	
-////			}				
-////		}
-//		
-//		if(!playerHasSettings){
-//			savePlayerRadioSettings(player);
-//		}
-//	}
-//	
-//	public void savePlayerRadioSettings(Player player){
-//	//Map<String, Object> playerSettings = new HashMap<String,Object>();
-//	Map<String, Object> playerSetting = new HashMap<String,Object>();
-//	playerSetting.put("radio",isRadioOn(player));
-//	playerSetting.put("freq",getPlayerRadioChannel(player));	
-//	playerSetting.put("code",getPlayerRadioCode(player));
-//	playerSetting.put("mic",getPlayerMic(player));
-//	playerSetting.put("filter",getPlayerFilter(player));
-//	playerSetting.put("cutoff",getPlayerCutoff(player));
-//	playerSetting.put("link",getPlayerLinkID(player));
-//	playerSetting.put("favorites", getFavRadios(player));
-//	//playerSettings.put(player.getDisplayName(), playerSetting);
-//	//playerRadioConfig.createSection("radio-settings",playerSettings);
-//	playerRadioConfig.createSection(player.getDisplayName(), playerSetting);
-//	saveConfigPlayerRadioSettings();
-//	}	
-	
 
-	//Load/Save Plugin Settings
+	//Load/Save Plugin Settings from config.yml
 	private void loadSettings(){
 		this.varMsgFormat = AMChat.tools().formatLoadFix(amcConfig.getString("radio-format", varMsgFormat));
 		this.varRadioFreqSuffix = amcConfig.getString("radio-suffix",varRadioFreqSuffix);
@@ -171,10 +94,10 @@ public class AMChatSettingsManager {
 		this.varLimitPlayerChat = amcConfig.getBoolean("chat-limited", varLimitPlayerChat);
 		this.varLimitRadioChat = amcConfig.getBoolean("radio-limited", varLimitRadioChat);
 		this.varSkyWaveEnabled = amcConfig.getBoolean("enable-skywave", varSkyWaveEnabled);
-		this.varRadioSkyWaveMod = amcConfig.getDouble("skywave-mod", varRadioSkyWaveMod);
+		this.varSkyWaveMod = amcConfig.getDouble("skywave-mod", varSkyWaveMod);
 		this.varRadioMinFreq = amcConfig.getInt("radio-min", varRadioMinFreq);
 		this.varRadioMaxFreq = amcConfig.getInt("radio-max", varRadioMaxFreq);
-		this.varRadioMaxCuttoff = amcConfig.getInt("radio-cutoff-max", varRadioMaxCuttoff);
+		this.varRadioMaxCutoff = amcConfig.getInt("radio-cutoff-max", varRadioMaxCutoff);
 		this.varRadioMaxCode = amcConfig.getInt("radio-code-max", varRadioMaxCode);
 		this.varRadioDefFreq = amcConfig.getInt("radio-default-channel", varRadioDefFreq);
 		this.varRadioAutoOn = amcConfig.getBoolean("radio-auto-on", varRadioAutoOn);
@@ -191,10 +114,10 @@ public class AMChatSettingsManager {
 		amcConfig.set("chat-limited", varLimitPlayerChat);
 		amcConfig.set("radio-limited", varLimitRadioChat);
 		amcConfig.set("enable-skywave", varSkyWaveEnabled);
-		amcConfig.set("skywave-mod", varRadioSkyWaveMod);
+		amcConfig.set("skywave-mod", varSkyWaveMod);
 		amcConfig.set("radio-min", varRadioMinFreq);
 		amcConfig.set("radio-max", varRadioMaxFreq);
-		amcConfig.set("radio-cutoff-max", varRadioMaxCuttoff);
+		amcConfig.set("radio-cutoff-max", varRadioMaxCutoff);
 		amcConfig.set("radio-code-max", varRadioMaxCode);
 		amcConfig.set("radio-default-channel", varRadioDefFreq);
 		amcConfig.set("radio-auto-on", varRadioAutoOn);	
@@ -203,20 +126,21 @@ public class AMChatSettingsManager {
 		AMChat.get().saveConfig();
 	}
 	
-	//Player Settings File Get/Save//
-	private void reloadConfigPlayerRadioSettings(){
-		if(playerRadioConfigFile==null){
-			playerRadioConfigFile=new File(AMChat.get().getDataFolder(),"pl.settings.yml");
-		}		
-		playerRadioConfig = YamlConfiguration.loadConfiguration(playerRadioConfigFile);		
-		}
-	
-	public FileConfiguration getConfigPlayerRadioSettings(){
+	// pl.settings.yml saving/loading //
+	private FileConfiguration getConfigPlayerRadioSettings(){
 		if (playerRadioConfig==null){
 			reloadConfigPlayerRadioSettings();
 			}
 		return playerRadioConfig;			
 	}
+
+	private void reloadConfigPlayerRadioSettings(){
+		if(playerRadioConfigFile==null){
+		   playerRadioConfigFile=new File(AMChat.get().getDataFolder(),"pl.settings.yml");
+		}		
+		playerRadioConfig = YamlConfiguration.loadConfiguration(playerRadioConfigFile);		
+		}
+	
 	
 	public void saveConfigPlayerRadioSettings(){
 		if (playerRadioConfigFile==null||playerRadioConfig==null){
@@ -230,4 +154,6 @@ public class AMChatSettingsManager {
 		}
 		
 	}	
-}
+	// pl.settings.yml saving/loading to/from disk//
+	
+}//EOL

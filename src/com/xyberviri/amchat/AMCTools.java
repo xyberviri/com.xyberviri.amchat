@@ -69,31 +69,23 @@ public class AMCTools {
 	
 	//Formatter for Radio chat by broadcasting player
 	public String createMessage(Player player,String message){
-		String msgToReturn = amcMain.varMsgFormat;		
-		msgToReturn = msgToReturn.replace("%FREQ", Integer.toString(amcMain.getPlayerRadioChannel(player)));
-		msgToReturn = msgToReturn.replace("%CODE",String.format("%03d", amcMain.getPlayerRadioCode(player)));
+		String msgToReturn = AMChat.settings().getMsgFormat();		
+		msgToReturn = msgToReturn.replace("%FREQ", AMChat.player(player).getFrequency().toString());
+		msgToReturn = msgToReturn.replace("%CODE",String.format("%03d", AMChat.player(player).getSquelchCode().toString()));
 		msgToReturn = msgToReturn.replace("%SENDER", player.getDisplayName());
-		msgToReturn = msgToReturn.replace("%SUFFIX", amcMain.varRadioFreqSuffix);
+		msgToReturn = msgToReturn.replace("%SUFFIX", AMChat.settings().getRadioSuffix());
 		msgToReturn = msgToReturn.replace("%MESSAGE", message);
 		return msgToReturn;
 	}
 
-	//encrypted Formatter for Radio chat by broadcasting player
-	public String createBadMessage(String message){
-		String msgToReturn = amcMain.varMsgFormat;		
-		msgToReturn = msgToReturn.replace("%FREQ","??");
-		msgToReturn = msgToReturn.replace("%CODE","???");
-		msgToReturn = msgToReturn.replace("%SENDER", "??");
-		msgToReturn = msgToReturn.replace("%SUFFIX", amcMain.varRadioFreqSuffix);
-		msgToReturn = msgToReturn.replace("%MESSAGE",scrambleString(message));
-		return msgToReturn;
-	}
+
 	
 	public String scrambleString(String inputword) {
 		inputword = inputword.toLowerCase();
 		//remove all non alpha and alpha eaton rishd should eliminate 65% of all English.
-		//the \W will remove all should remove all non English alpha.
 		String word = inputword.replaceAll("[\\d\\s\\Weatonrishd]", "");
+		if(word.length() == 0){return "";}
+		
 	    StringBuilder builder = new StringBuilder(word.length());
 	    boolean[] used = new boolean[word.length()];
 	    for (int i = 0; i < word.length(); i++) {
@@ -115,16 +107,5 @@ public class AMCTools {
 	public String formatLoadFix(String string){
 		string = string.replaceAll("&([0-9a-f])", "\u00a7$1");
 		return string;
-	}
-	
-
-	
-	
-	//returns true if we are loaded from the main plugin. 
-	public boolean isLoaded(AMChat amcMainPlugin) {
-		if (this.amcMain.equals(amcMainPlugin)){
-			return true;
-			}
-		return false;
 	}
 }
