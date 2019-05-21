@@ -34,20 +34,6 @@ public class AMCTools {
 		distanceBetween = Math.sqrt(((x2-x1)*(x2-x1))+((y2-y1)*(y2-y1))+((z2-z1)*(z2-z1)));
 		return distanceBetween;
 	}
-	
-	
-	//Converts double to float and performs inverse square calculation. 
-	//Divide the return by 1 to get the distance.
-	double invSqrt(double y){
-		float x = (float) y;	//this shouldn't be a problem unless there are very large maps
-	    float xhalf = 0.5f*x;	
-	    int i = Float.floatToIntBits(x); // get bits for floating value
-	    i = 0x5f375a86- (i>>1); // gives initial guess y0
-	    x = Float.intBitsToFloat(i); // convert bits back to float
-	    x = x*(1.5f-xhalf*x*x); // Newton step, repeating increases accuracy
-	    double z = (double) x;
-	    return z;
-	}
 	  
 	//This is a simple status message to the player were working on.
 	public void msgToPlayer(Player player,String message){
