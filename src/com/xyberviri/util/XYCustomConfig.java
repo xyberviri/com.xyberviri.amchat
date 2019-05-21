@@ -9,9 +9,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 public class XYCustomConfig {
-	private FileConfiguration customConfig=null; 			//Configuration handle
-	private File customConfigFile = null;					//File where we store data.
-	private String dataFile;								//Internal handles for folder and file.
+	private FileConfiguration customConfig=null; 	//Configuration handle
+	private File customConfigFile = null;		//File where we store data.
+	private String dataFile;			//Internal handles for folder and file.
 	Plugin p;
 	
 	public XYCustomConfig(Plugin p,String dataFile){
