@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -63,9 +64,8 @@ public class AMChatCmd implements CommandExecutor {
 			return true;
 		}	
 		
-		Player player = (Player) sender;
-		
-		if(amcMain.varHeldItemReq && player.getItemInHand().getTypeId() != amcMain.varHeldItemID){
+		Player player = (Player) sender;		
+		if(amcMain.varHeldItemReq && player.getPlayer().getInventory().getItemInMainHand().getType()!=Material.COMPASS){
 			amcMain.amcTools.msgToPlayer(player,"Sorry, you need to be holding a radio before you can change the settings.");
 			return true;
 		}

@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.craftbukkit.libs.jline.internal.InputStreamReader;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -87,12 +88,14 @@ public class AMChat extends JavaPlugin {
 		}
 		
 		playerRadioConfig = YamlConfiguration.loadConfiguration(playerRadioConfigFile);
-		InputStream defConfigStream = getResource("pl.settings.yml");
 		
+		InputStream defConfigStream = getResource("pl.settings.yml");        
 		if (defConfigStream != null) {
-			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defConfigStream));
 			playerRadioConfig.setDefaults(defConfig);
-	}}
+		}
+		
+	}
 	
 	public FileConfiguration getConfigPlayerRadioSettings(){
 		if (playerRadioConfig==null){
