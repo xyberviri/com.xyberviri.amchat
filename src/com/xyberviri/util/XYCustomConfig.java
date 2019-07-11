@@ -6,6 +6,7 @@ import java.io.InputStream;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.craftbukkit.libs.jline.internal.InputStreamReader;
 import org.bukkit.plugin.Plugin;
 
 public class XYCustomConfig {
@@ -30,7 +31,7 @@ public class XYCustomConfig {
 		InputStream defConfigStream = p.getResource(dataFile);
 		
 		if (defConfigStream != null) {
-			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defConfigStream));
 			customConfig.setDefaults(defConfig);
 	}}
 	

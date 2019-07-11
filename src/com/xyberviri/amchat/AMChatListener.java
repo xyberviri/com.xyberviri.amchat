@@ -7,10 +7,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.PlayerInventory;
 
 import com.xyberviri.amchat.events.AMChatEvent;
 import com.xyberviri.amchat.events.AMEventCenter;
@@ -53,7 +55,7 @@ public class AMChatListener implements Listener {
     }    		
 	
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerChat(PlayerChatEvent event){
+	public void onPlayerChat(AsyncPlayerChatEvent event){
 		if(event.isCancelled()) return;	
 		Player sender = event.getPlayer();
 		boolean isRadio = false; 
@@ -61,8 +63,16 @@ public class AMChatListener implements Listener {
 		//Check if the radio is on and the mic is open
 		if(amcMain.isRadioOn(sender)&&amcMain.getPlayerMic(sender)){
 			isRadio = true;
+			PlayerInventory inventory = sender.getInventory();
 			//If the server requires the item in hand and we don't have it, flag this as non radio chat.
-			if(amcMain.varHeldItemReq && sender.getItemInHand().getTypeId() != amcMain.varHeldItemID)
+			if(amcMain.varHeldItemReq && 
+					(
+							inventory.getItemInMainHand().getType()==Material.COMPASS
+							||
+							inventory.getItemInOffHand().getType()==Material.COMPASS
+					 )
+					 
+					)
 			{isRadio = false;}
 		}
 		
@@ -103,7 +113,7 @@ public class AMChatListener implements Listener {
 	
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteract(PlayerInteractEvent event) {
-    	if(event.getPlayer().getItemInHand().getTypeId() == amcMain.varHeldItemID){
+    	if(event.getPlayer().getInventory().getItemInMainHand().getType()==Material.COMPASS){
     		if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
     			//TODO:Add Options here for players to have shortcuts on left/right mouse buttons. 
     			amcMain.scanPlayerRadioChannel(event.getPlayer(), true);
