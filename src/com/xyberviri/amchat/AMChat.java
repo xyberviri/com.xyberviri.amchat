@@ -51,6 +51,7 @@ public class AMChat extends JavaPlugin {
 	
 	double varRadioSkyWaveMod = 2;		// This distance to modify the chat distance for radios at night.
 	boolean varSkyWaveEnabled = false;	// Is SkyWave Effect enabled?
+	boolean varUse3dDistances = true;
 	
 	boolean varRadioAutoOn = true;		// if we should automatically turn a players radio on
 	int varRadioDefFreq = 64;			// The first time a invalid frequency is returned, return this instead. this is also the /am home channel 
@@ -127,6 +128,8 @@ public class AMChat extends JavaPlugin {
 		this.varLimitPlayerChat = amcConfig.getBoolean("chat-limited", varLimitPlayerChat);
 		this.varLimitRadioChat = amcConfig.getBoolean("radio-limited", varLimitRadioChat);
 		this.varSkyWaveEnabled = amcConfig.getBoolean("enable-skywave", varSkyWaveEnabled);
+		this.varUse3dDistances = amcConfig.getBoolean("use-3d-distance",varUse3dDistances);
+		
 		this.varRadioSkyWaveMod = amcConfig.getDouble("skywave-mod", varRadioSkyWaveMod);
 		this.varRadioMinFreq = amcConfig.getInt("radio-min", varRadioMinFreq);
 		this.varRadioMaxFreq = amcConfig.getInt("radio-max", varRadioMaxFreq);
@@ -157,6 +160,7 @@ public class AMChat extends JavaPlugin {
 		amcConfig.set("radio-limited", varLimitRadioChat);
 		amcConfig.set("enable-skywave", varSkyWaveEnabled);
 		amcConfig.set("skywave-mod", varRadioSkyWaveMod);
+		amcConfig.set("use-3d-distance",varUse3dDistances);		
 		amcConfig.set("radio-min", varRadioMinFreq);
 		amcConfig.set("radio-max", varRadioMaxFreq);
 		amcConfig.set("radio-cutoff-max", varRadioMaxCuttoff);
@@ -658,18 +662,18 @@ public class AMChat extends JavaPlugin {
 	}	
 	
 	public boolean canLink(AMChatRadio radio, Player player) {
-		if (player.hasPermission("amchat.radio.override.link")||player.isOp()){
+		if(radio.isAdmin())
 			return true;
-			}			
-		if(!isRadioOn(player)){//The player doesn't even have his radio on			
-			return false;
-			} 
-		
+		if (player.hasPermission("amchat.radio.override.link")||player.isOp()){
+				return true;
+			}					
 		if(!radio.getLoc().getWorld().equals(player.getWorld())){ //we can't talk to the other side.
-			return false;
+			amcTools.errorToPlayer(player, "Your radio is unable to communicate across dimensions.");
+				return false;
 			}
 		if(varLimitRadioChat){
 			if (!radio.isAdmin()&&(amcTools.getDistance(radio.getLoc(), player.getLocation()) > radio.getMaxDistance())){
+				amcTools.errorToPlayer(player, "You are outside of the linkable distance.");
 				return false;
 				}
 			}

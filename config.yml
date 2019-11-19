@@ -22,6 +22,8 @@ radio-limited: true
 enable-skywave: false
 #How far should we boost the radio chat distance when skywave is in effect?
 skywave-mod: 2.0
+#should we take height into consideration when checking chat distance?
+use-3d-distance: true
 
 #Limits
 #Lowest frequency users can select

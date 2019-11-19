@@ -76,9 +76,9 @@ public class AMChatCmd implements CommandExecutor {
 			
 		//am
 		if (player.hasPermission("amchat.radio.personal.use") && args.length == 0){
-			amcMain.amcTools.msgToPlayer(player,"[ RADIO ]:"," "+(amcMain.getPlayerMic(player)?"On":  "Off"));
-			amcMain.amcTools.msgToPlayer(player,"[ FREQ ]:"," "+amcMain.getPlayerRadioChannel(player));
-			amcMain.amcTools.msgToPlayer(player,"[ CODE ]:"," "+amcMain.getPlayerRadioCode(player));
+			amcMain.amcTools.msgToPlayer(player,"[ RADIO  ]:"," "+(amcMain.getPlayerMic(player)?"On":  "Off"));
+			amcMain.amcTools.msgToPlayer(player,"[ FREQ   ]:"," "+amcMain.getPlayerRadioChannel(player));
+			amcMain.amcTools.msgToPlayer(player,"[ CODE   ]:"," "+amcMain.getPlayerRadioCode(player));
 			amcMain.amcTools.msgToPlayer(player,"[ CUTOFF ]:"," "+amcMain.getPlayerCutoff(player));
 			amcMain.amcTools.msgToPlayer(player,"[ LINKID ]:"," "+amcMain.getPlayerLinkID(player));
 			amcMain.amcTools.msgToPlayer(player,"[ MIC ON ]:"," "+(amcMain.getPlayerMic(player)?  "Open":"Muted"));			

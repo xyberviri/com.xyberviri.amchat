@@ -306,6 +306,7 @@ public class AMChatRadioManager {
 			AMChatRadio targetRadio=amRadioHandles.get(linkID);
 			if(amcMain.canLink(targetRadio, player)){
 				if(targetRadio.roomToJoin()){
+					if(!amcMain.isRadioOn(player)){amcMain.togglePlayerRadio(player);}					
 					if(isLinkValid(curLinkID)){amRadioHandles.get(curLinkID).delUser(player);}
 					targetRadio.linkPlayer(player);	
 					amcMain.setPlayerLinkID(player, targetRadio.getName());
@@ -315,12 +316,12 @@ public class AMChatRadioManager {
 					amcMain.amcTools.msgToPlayer(player, "A link has successfully been established to ",linkID);
 					AMEventCenter.callAMChatRadioJoinEvent(player, targetRadio);
 					return true;
-				} else {amcMain.amcTools.errorToPlayer(player, "Sorry, you are unable to link to that radio because it is at max capacity.");}
+				} else {amcMain.amcTools.errorToPlayer(player, "Sorry, unable to link to a radio tower because it is at max capacity.");}
 			} else {
-				amcMain.amcTools.errorToPlayer(player, "Sorry, you are outside of the linkable range.");
+				amcMain.amcTools.errorToPlayer(player, "Sorry, unable to link to that radio tower.");
 			}
 		} else {
-			amcMain.amcTools.errorToPlayer(player, "Sorry, that link id was invalid.");
+			amcMain.amcTools.errorToPlayer(player, "Sorry, unable to link to radio tower, the link id was invalid or nolonger exists.");
 		}
 		amcMain.setPlayerLinkID(player,"none");
 		return false;

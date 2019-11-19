@@ -59,26 +59,21 @@ public class AMChatListener implements Listener {
 		if(event.isCancelled()) return;	
 		Player sender = event.getPlayer();
 		boolean isRadio = false; 
-		
 		//Check if the radio is on and the mic is open
 		if(amcMain.isRadioOn(sender)&&amcMain.getPlayerMic(sender)){
 			isRadio = true;
-			PlayerInventory inventory = sender.getInventory();
 			//If the server requires the item in hand and we don't have it, flag this as non radio chat.
-			if(amcMain.varHeldItemReq && 
-					(
-							inventory.getItemInMainHand().getType()==Material.COMPASS
-							||
-							inventory.getItemInOffHand().getType()==Material.COMPASS
-					 )
-					 
-					)
-			{isRadio = false;}
+			if(amcMain.varHeldItemReq) {
+				PlayerInventory inventory = sender.getInventory();
+					if (!(inventory.getItemInMainHand().getType()==Material.COMPASS || inventory.getItemInOffHand().getType()==Material.COMPASS)) {
+						isRadio = false;
+					}
+			}
 		}
 		
-		
+		//If were not radio chat and AmChat isn't managing local chat we do have any work left to do.
 		if((!isRadio) && (!amcMain.isLocalManaged())){
-			amcMain.logMessage("Ignoring chat event");
+			//amcMain.logMessage("Ignoring chat event"); //This is a debug message
 			return;
 		}
 		

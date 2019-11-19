@@ -22,16 +22,19 @@ public class AMCTools {
 	public double getDistance(Location location1,Location location2){
 		// This only accepts location objects. 
 		double distanceBetween;
-
-		// if (!(location1.getWorld() == location2.getWorld())){return -1.0f;}
-		
 		double x1 = location1.getX() + 0.01;
 		double x2 = location2.getX() + 0.01;
-		double y1 = location1.getY() + 0.01;
-		double y2 = location2.getY() + 0.01;
 		double z1 = location1.getZ() + 0.01;
 		double z2 = location2.getZ() + 0.01;
-		distanceBetween = Math.sqrt(((x2-x1)*(x2-x1))+((y2-y1)*(y2-y1))+((z2-z1)*(z2-z1)));
+		
+		if(AMChat.amcChatMain.varUse3dDistances) {
+			double y1 = location1.getY() + 0.01;
+			double y2 = location2.getY() + 0.01;
+			distanceBetween = Math.sqrt(((x2-x1)*(x2-x1))+((y2-y1)*(y2-y1))+((z2-z1)*(z2-z1)));	
+		} else {
+			distanceBetween = Math.sqrt(((x2-x1)*(x2-x1))+((z2-z1)*(z2-z1)));
+		}
+		
 		return distanceBetween;
 	}
 	  

@@ -7,7 +7,7 @@ commands:
    am:
       description: display information about your radio
       permission: amchat.radio.personal.use
-      usage: type /help am for more information.
+      usage: Usage /am
    am radio:
       description: toggles your radio on off 
       permission: amchat.radio.personal.radio
