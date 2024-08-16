@@ -3,3 +3,5 @@ Just like a radio that frequency can be change, you can also encode that chat so
 Local Chat can also be restricted, by default this is set to 64 blocks. A filter can be set so only legible text can be received.
 
 You can optionally limit the distance of radio chat as well.
+
+https://www.curseforge.com/minecraft/bukkit-plugins/amchat
